@@ -2,15 +2,25 @@
     <string name="app_name">ChronoSchedule</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="prompt_username">Write username</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_username">This username is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_DayForm">Edit Day</string>
+    <string name="title_activity_Login">Chrono login</string>
+    <string name="title_activity_Main">ChronoSchedule</string>
+    <string name="title_activity_Settings">Chrono setup</string>
+    <string name="title_activity_ShiftForm">Edit Shift</string>
+    <string name="title_activity_UserForm">Edit User</string>
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

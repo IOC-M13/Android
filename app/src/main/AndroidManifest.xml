@@ -13,6 +13,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".controllers.LoginActivity"
             android:label="@string/app_name">
@@ -22,6 +23,29 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".controllers.MainActivity"
+            android:label="@string/title_activity_Main"/>
+
+        <activity
+            android:name=".controllers.SettingsActivity"
+            android:label="@string/title_activity_Settings"/>
+
+        <activity
+            android:name=".controllers.UserFormActivity"
+            android:label="@string/title_activity_UserForm"/>
+
+        <activity
+            android:name=".controllers.ShiftFormActivity"
+            android:label="@string/title_activity_ShiftForm"/>
+
+        <activity
+            android:name=".controllers.DayFormActivity"
+            android:label="@string/title_activity_DayForm">
+
+        </activity>
+
     </application>
 
 </manifest>

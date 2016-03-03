@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".SettingsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/hostname_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hostname/IP address"
+            android:hint="127.0.0.1"
+            android:textSize="24sp"
+            android:paddingTop="10dp"/>
+
+        <EditText
+            android:id="@+id/hostname_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="127.0.0.1"
+            android:textColor="#313131"
+            android:textSize="24sp"/>
+
+        <TextView
+            android:id="@+id/port_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Listen port"
+            android:hint="127.0.0.1"
+            android:textSize="24sp"
+            android:paddingTop="20dp"/>
+
+        <EditText
+            android:id="@+id/port_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3306"
+            android:textColor="#313131"
+            android:textSize="24sp"/>
+
+
+    </LinearLayout>
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_menu_save" />
+
+</android.support.design.widget.CoordinatorLayout>
