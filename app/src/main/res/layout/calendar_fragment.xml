@@ -10,7 +10,7 @@
         android:id="@+id/calendar_user_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Alejandro Olivan"
+        android:text="Fulano de Tal"
         android:layout_marginTop="10dp"
         android:visibility="invisible"/>
 
