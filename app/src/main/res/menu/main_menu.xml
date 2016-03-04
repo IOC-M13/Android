@@ -6,7 +6,7 @@
 
     <item android:id="@+id/refresh"
         android:title="Resync"
-        android:icon="@drawable/ic_popup_sync"
+        android:icon="@drawable/stat_notify_sync_anim0"
         android:orderInCategory="100"
         app:showAsAction="always"
 

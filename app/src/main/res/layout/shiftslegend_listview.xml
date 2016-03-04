@@ -1,0 +1,20 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal"
+    android:gravity="center|left">
+
+    <Button
+        android:id="@+id/legend_shift_button"
+        android:layout_width="20sp"
+        android:layout_height="10sp"
+        android:text=""
+        android:layout_marginRight="10sp"/>
+
+    <TextView
+        android:id="@+id/legend_shift_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"/>
+
+</LinearLayout>
