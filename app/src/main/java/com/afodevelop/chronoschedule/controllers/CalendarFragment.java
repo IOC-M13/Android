@@ -1,23 +1,29 @@
 package com.afodevelop.chronoschedule.controllers;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.ShiftsLegendListAdapter;
+import com.afodevelop.chronoschedule.controllers.adapters.ShiftsLegendListAdapter;
 import com.imanoweb.calendarview.CalendarListener;
 import com.imanoweb.calendarview.CustomCalendarView;
+import com.imanoweb.calendarview.DayDecorator;
+import com.imanoweb.calendarview.DayView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -53,6 +59,20 @@ public class CalendarFragment extends Fragment {
     // CLASSWIDE VARIABLES
     private CustomCalendarView calendarView;
     private View myFragmentView;
+    private SimpleDateFormat df, dm;
+
+    private class ColorDecorator implements DayDecorator {
+
+        @Override
+        public void decorate(DayView cell) {
+            String hexColor = queryDayColor(cell);
+            if (hexColor != null){
+                int color = Color.parseColor("#" + hexColor);
+                    Log.d("decorate", "color = " + color);
+                    cell.setBackgroundColor(color);
+            }
+        }
+    }
 
 
     // LOGIC
@@ -83,27 +103,54 @@ public class CalendarFragment extends Fragment {
         //call refreshCalendar to update calendar the view
         calendarView.refreshCalendar(currentCalendar);
         //Handling custom calendar events
+        df = new SimpleDateFormat("dd-MM-yyyy");
+        dm = new SimpleDateFormat("MM-yyyy");
         calendarView.setCalendarListener(new CalendarListener() {
             @Override
             public void onDateSelected(Date date) {
-                SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-                Toast.makeText(getActivity(), df.format(date), Toast.LENGTH_SHORT).show();
+                // HANDLE CLICK ON CALENDAR DAY
+
+                Intent i = new Intent(getActivity(), DayFormActivity.class);
+                Bundle extras = new Bundle();
+                extras.putString("date", df.format(date));
+                extras.putString("user", DEMO_USERS[0]);
+                i.putExtras(extras);
+                startActivity(i);
             }
 
             @Override
             public void onMonthChanged(Date date) {
-                SimpleDateFormat df = new SimpleDateFormat("MM-yyyy");
-                Toast.makeText(getActivity(), df.format(date), Toast.LENGTH_SHORT).show();
+                // HANDLE SWITCH TO NEXT/PREV MONTH
+
             }
         });
+
+        //adding calendar day decorators
+        List<DayDecorator> decorators = new ArrayList<>();
+        decorators.add(new ColorDecorator());
+        calendarView.setDecorators(decorators);
+        calendarView.refreshCalendar(currentCalendar);
 
         ShiftsLegendListAdapter adapter = new ShiftsLegendListAdapter(getActivity(), DEMO_COLORS, DEMO_SHIFTS);
         ListView list = (ListView) myFragmentView.findViewById(R.id.shifts_legend_list);
         list.setAdapter(adapter);
 
 
-
-
         return myFragmentView;
+    }
+
+    private String queryDayColor(DayView cell){
+
+        Date dayDate = cell.getDate();
+        switch (df.format(dayDate)){
+            case "08-03-2016":
+                return "ff0000";
+            case "18-03-2016":
+                return "00FF00";
+            case "28-03-2016":
+                return "0000ff";
+            default:
+                return null;
+        }
     }
 }

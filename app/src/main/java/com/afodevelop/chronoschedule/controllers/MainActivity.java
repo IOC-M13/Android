@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.afodevelop.chronoschedule.R;
+import com.afodevelop.chronoschedule.controllers.adapters.PagerAdapter;
 
 
 public class MainActivity extends AppCompatActivity {
