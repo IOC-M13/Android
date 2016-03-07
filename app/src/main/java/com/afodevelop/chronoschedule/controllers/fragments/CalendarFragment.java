@@ -1,4 +1,4 @@
-package com.afodevelop.chronoschedule.controllers;
+package com.afodevelop.chronoschedule.controllers.fragments;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.afodevelop.chronoschedule.R;
+import com.afodevelop.chronoschedule.controllers.activities.DayFormActivity;
 import com.afodevelop.chronoschedule.controllers.adapters.ShiftsLegendListAdapter;
 import com.imanoweb.calendarview.CalendarListener;
 import com.imanoweb.calendarview.CustomCalendarView;

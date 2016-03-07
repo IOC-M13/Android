@@ -3,7 +3,8 @@
     android:layout_height="fill_parent"
     android:orientation="horizontal"
     android:gravity="bottom|left"
-    android:paddingTop="10dp">
+    android:paddingTop="10dp"
+    android:descendantFocusability="blocksDescendants">
 
     <ImageButton
         android:id="@+id/users_shift_itemicon"
@@ -11,12 +12,18 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_menu_edit"
         android:layout_marginRight="15sp"
-        android:background="@null"/>
+        android:background="@null"
+        android:focusableInTouchMode="false"
+        android:focusable="false"
+        android:clickable="false"/>
 
     <TextView
         android:id="@+id/users_shift_itemname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="15sp"/>
+        android:textSize="15sp"
+        android:focusableInTouchMode="false"
+        android:focusable="false"
+        android:clickable="false"/>
 
 </LinearLayout>

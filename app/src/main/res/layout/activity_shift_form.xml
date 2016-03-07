@@ -22,7 +22,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_menu_paste_holo_dark"
+                android:src="@drawable/ic_menu_paste_holo_light"
                 android:layout_marginRight="10dp"/>
 
             <TextView
@@ -35,6 +35,7 @@
         </LinearLayout>
 
         <EditText
+            android:id="@+id/edit_shift_edittext_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter shift name"
@@ -45,7 +46,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_gravity="center">
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -62,18 +64,110 @@
 
         </LinearLayout>
 
-        <TimePicker
-            android:id="@+id/edit_shift_start_picker"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true">
+            android:orientation="horizontal"
+            android:layout_gravity="center">
 
-        </TimePicker>
+            <Button
+                android:id="@+id/edit_shift_start_time_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:text=""/>
+
+            <TextView
+                android:id="@+id/edit_shift_start_time_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="24sp"
+                android:text=""/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_menu_recent_history"
+                android:layout_marginRight="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:text="@string/edit_shift_pick_endtime"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <Button
+                android:id="@+id/edit_shift_end_time_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:text=""/>
+
+            <TextView
+                android:id="@+id/edit_shift_end_time_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="24sp"
+                android:text=""/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_menu_paste"
+                android:layout_marginRight="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:text="@string/edit_shift_pick_color"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/edit_shift_color_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="#FFFFFF"
+            android:textSize="20dp"
+            android:layout_margin="8dp"/>
+
+
 
 
     </LinearLayout>
-
-
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/confirm_dayshift_button"

@@ -1,14 +1,17 @@
-package com.afodevelop.chronoschedule.controllers;
+package com.afodevelop.chronoschedule.controllers.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.afodevelop.chronoschedule.R;
+import com.afodevelop.chronoschedule.controllers.activities.UserFormActivity;
 
 /**
  * Created by alex on 3/03/16.
@@ -30,6 +33,7 @@ public class UsersFragment extends Fragment {
     private View myFragmentView;
     private ListView listView;
     private ArrayAdapter arrayAdapter;
+    private boolean isNew;
 
 
     // LOGIC
@@ -41,6 +45,18 @@ public class UsersFragment extends Fragment {
         listView = (ListView) myFragmentView.findViewById(R.id.users_list);
         arrayAdapter = new ArrayAdapter(getActivity(), R.layout.users_shifts_listview, R.id.users_shift_itemname, DEMO_USERS);
         listView.setAdapter(arrayAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+                Intent i = new Intent(getActivity(), UserFormActivity.class);
+                Bundle extras = new Bundle();
+                extras.putString("user", DEMO_USERS[position]);
+                i.putExtras(extras);
+                startActivity(i);
+
+            }
+        });
 
         return myFragmentView;
     }

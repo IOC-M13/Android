@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.afodevelop.chronoschedule"
-        minSdkVersion 14
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -28,4 +28,5 @@ dependencies {
     compile 'com.android.support:support-v4:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
     compile 'com.github.npanigrahy:Custom-Calendar-View:v1.0'
+    compile "com.github.danielnilsson9:color-picker-view:1.4.0@aar"
 }

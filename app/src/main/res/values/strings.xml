@@ -32,7 +32,7 @@
     <!-- Edit DayShift Activity-->
     <string name="edit_shift_label_name">Shift designation or name:</string>
     <string name="edit_shift_pick_starttime">Shift start time:</string>
-    <string name="edit_shift_pick_endtmie">Shift end time:</string>
-    <string name="edit_shift_pick_color">Shift end time:</string>
+    <string name="edit_shift_pick_endtime">Shift end time:</string>
+    <string name="edit_shift_pick_color">Choose shift calendar color:</string>
 
 </resources>

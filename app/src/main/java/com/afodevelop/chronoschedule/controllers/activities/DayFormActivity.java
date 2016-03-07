@@ -1,4 +1,4 @@
-package com.afodevelop.chronoschedule.controllers;
+package com.afodevelop.chronoschedule.controllers.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

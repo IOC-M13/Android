@@ -16,4 +16,14 @@
         <item name="android:textSize">9sp</item>
     </style>
 
+    <style name="LightPickerDialogTheme" parent="android:Theme.Holo.Light.Dialog">
+        <item name="android:windowMinWidthMinor">0dip</item>
+        <item name="android:windowMinWidthMajor">0dip</item>
+    </style>
+
+    <style name="DarkPickerDialogTheme" parent="android:Theme.Holo.Dialog">
+        <item name="android:windowMinWidthMinor">0dip</item>
+        <item name="android:windowMinWidthMajor">0dip</item>
+    </style>
+
 </resources>

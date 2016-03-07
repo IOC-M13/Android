@@ -1,4 +1,4 @@
-package com.afodevelop.chronoschedule.controllers;
+package com.afodevelop.chronoschedule.controllers.activities;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
