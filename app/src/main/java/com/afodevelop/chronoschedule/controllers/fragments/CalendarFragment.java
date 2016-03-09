@@ -9,11 +9,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.activities.DayFormActivity;
+import com.afodevelop.chronoschedule.controllers.activities.UserFormActivity;
 import com.afodevelop.chronoschedule.controllers.adapters.ShiftsLegendListAdapter;
 import com.imanoweb.calendarview.CalendarListener;
 import com.imanoweb.calendarview.CustomCalendarView;
@@ -60,7 +62,10 @@ public class CalendarFragment extends Fragment {
     // CLASSWIDE VARIABLES
     private CustomCalendarView calendarView;
     private View myFragmentView;
+    private Spinner spinner;
+    private LinearLayout selectedUserLayout;
     private SimpleDateFormat df, dm;
+    private boolean isAdmin;
 
     private class ColorDecorator implements DayDecorator {
 
@@ -82,16 +87,39 @@ public class CalendarFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myFragmentView = inflater.inflate(R.layout.calendar_fragment, container, false);
 
+        isAdmin = checkAdminUser();
 
-        Spinner spinner = (Spinner) myFragmentView.findViewById(R.id.calendar_user_spinner);
-        // Create an ArrayAdapter using the string array and a default spinner layout
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getActivity(),
-                android.R.layout.simple_spinner_item, DEMO_USERS);
-        // Specify the layout to use when the list of choices appears
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner
-        spinner.setAdapter(spinnerAdapter);
+        if (isAdmin) {
 
+            spinner = (Spinner) myFragmentView.findViewById(R.id.calendar_user_spinner);
+            // Create an ArrayAdapter using the string array and a default spinner layout
+            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_spinner_item, DEMO_USERS);
+            // Specify the layout to use when the list of choices appears
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            // Apply the adapter to the spinner
+            spinner.setAdapter(spinnerAdapter);
+            spinner.setVisibility(View.VISIBLE);
+
+        } else {
+
+            selectedUserLayout = (LinearLayout) myFragmentView.findViewById(R.id.selected_user_layout);
+            selectedUserLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    Intent i = new Intent(getActivity(), UserFormActivity.class);
+                    Bundle extras = new Bundle();
+                    extras.putBoolean("isNew", false);
+                    extras.putString("user", DEMO_USERS[3]);
+                    i.putExtras(extras);
+                    startActivity(i);
+
+                }
+            });
+            selectedUserLayout.setVisibility(View.VISIBLE);
+
+        }
 
         //Initialize CustomCalendarView from layout
         calendarView = (CustomCalendarView) myFragmentView.findViewById(R.id.calendar_view);
@@ -153,5 +181,9 @@ public class CalendarFragment extends Fragment {
             default:
                 return null;
         }
+    }
+
+    private boolean checkAdminUser(){
+        return true;
     }
 }

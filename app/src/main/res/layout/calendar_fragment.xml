@@ -6,13 +6,34 @@
     android:orientation="vertical"
     android:padding="6dp">
 
-    <TextView
-        android:id="@+id/calendar_user_text"
+
+    <LinearLayout
+        android:id="@+id/selected_user_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Fulano de Tal"
-        android:layout_marginTop="10dp"
-        android:visibility="invisible"/>
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_margin="3dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_menu_edit"
+            android:background="@null"
+            android:layout_marginRight="15dp"
+            />
+
+        <TextView
+            android:id="@+id/calendar_user_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Fulano de Tal"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+
+
 
     <Spinner
         android:id="@+id/calendar_user_spinner"
@@ -20,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:background="@color/grey"
-        android:visibility="visible">
+        android:visibility="gone">
     </Spinner>
 
     <com.imanoweb.calendarview.CustomCalendarView
@@ -28,7 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/off_white"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="45dp"
         app:calendarBackgroundColor="@color/off_white"
         app:calendarTitleTextColor="@color/black"
         app:currentDayOfMonthColor="@color/blue"

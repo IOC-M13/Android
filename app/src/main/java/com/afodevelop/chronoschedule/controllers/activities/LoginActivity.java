@@ -32,7 +32,7 @@ public class LoginActivity extends AppCompatActivity {
      * TODO: remove after connecting to a real authentication system.
      */
     private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "alex:123456", "oscar:678910"
+            "alex:123456", "oscar:678910", "admin:123456"
     };
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -185,8 +185,16 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void signIn() {
+    private void signIn(String user) {
+        Bundle extras = new Bundle();
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        extras.putString("user", user);
+        if (user.equals("admin")){
+            extras.putBoolean("isAdmin", true);
+        } else {
+            extras.putBoolean("isAdmin", false);
+        }
+        i.putExtras(extras);
         startActivity(i);
     }
 
@@ -242,7 +250,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                signIn();
+                signIn(mUsername);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

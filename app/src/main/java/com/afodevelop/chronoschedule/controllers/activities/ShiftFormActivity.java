@@ -37,32 +37,44 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     // CLASSWIDE VARIABLES
     private Button startTimeButton, endTimeButton, pickColorButton;
-    private TextView startTimeTextView, endTimeTextView;
+    private TextView shiftNameTextView, startTimeTextView, endTimeTextView;
     private EditText shiftNameTextEdit;
 
     private String shiftName, startDate, endDate, shiftColor;
     private int idShift;
-    private boolean isNew = false;
+    private boolean isNew;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shift_form);
 
-        shiftName = DEMO_SHIFTS[getIntent().getExtras().getInt("idShift")];
-        shiftColor = "#" + DEMO_COLORS[getIntent().getExtras().getInt("idShift")];
-        shiftNameTextEdit = (EditText) findViewById(R.id.edit_shift_edittext_name);
-        shiftNameTextEdit.setText(shiftName);
+        isNew = getIntent().getExtras().getBoolean("isNew");
+
+        if (isNew){
+            setTitle("Create Shift");
+            shiftNameTextEdit = (EditText) findViewById(R.id.edit_shift_edittext_name);
+            shiftNameTextEdit.setVisibility(View.VISIBLE);
+            shiftColor = "#888888";
+
+        }else{
+            setTitle("Edit Shift");
+            shiftName = DEMO_SHIFTS[getIntent().getExtras().getInt("idShift")];
+            shiftNameTextView = (TextView) findViewById(R.id.edit_shift_text_name);
+            shiftNameTextView.setText(shiftName);
+            shiftNameTextView.setVisibility(View.VISIBLE);
+            shiftColor = "#" + DEMO_COLORS[getIntent().getExtras().getInt("idShift")];
+
+        }
 
         startTimeButton = (Button) findViewById(R.id.edit_shift_start_time_button);
         startTimeTextView = (TextView) findViewById(R.id.edit_shift_start_time_text);
-        if (isNew){
+        if (isNew) {
             startTimeButton.setText("SET TIME");
-        }else{
+        } else {
             startTimeButton.setText("EDIT TIME");
             startTimeTextView.setText("00:00 AM");
         }
-
         startTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -98,7 +110,6 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
                 onClickColorPickerDialog();
             }
         });
-
 
     }
 

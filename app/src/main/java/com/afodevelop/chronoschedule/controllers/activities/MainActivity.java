@@ -13,23 +13,30 @@ import com.afodevelop.chronoschedule.controllers.adapters.PagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
+    private boolean isAdmin;
+    private String userName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
+        userName = getIntent().getExtras().getString("user");
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         TabLayout.Tab tmpTab;
         tmpTab = tabLayout.newTab().setText("Calendar");
         tmpTab.setIcon(R.drawable.ic_menu_month);
         tabLayout.addTab(tmpTab);
-        tmpTab = tabLayout.newTab().setText("Users");
-        tmpTab.setIcon(R.drawable.ic_menu_allfriends);
-        tabLayout.addTab(tmpTab);
-        tmpTab = tabLayout.newTab().setText("Shifts");
-        tmpTab.setIcon(R.drawable.ic_menu_recent_history);
-        tabLayout.addTab(tmpTab);
-
+        if (isAdmin) {
+            tmpTab = tabLayout.newTab().setText("Users");
+            tmpTab.setIcon(R.drawable.ic_menu_allfriends);
+            tabLayout.addTab(tmpTab);
+            tmpTab = tabLayout.newTab().setText("Shifts");
+            tmpTab.setIcon(R.drawable.ic_menu_recent_history);
+            tabLayout.addTab(tmpTab);
+        }
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
@@ -67,5 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean isAdmin(){
+        return isAdmin;
     }
 }

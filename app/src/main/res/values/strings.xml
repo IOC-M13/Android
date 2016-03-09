@@ -24,15 +24,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <!-- Edit DayShift Activity-->
+    <!-- Edit DayShift Activity -->
     <string name="edit_shiftday_label_date">Day shift on date:</string>
     <string name="edit_shiftday_label_user">Day shift for user:</string>
     <string name="edit_shiftday_label_shift">Select shift:</string>
 
-    <!-- Edit DayShift Activity-->
+    <!-- Edit Shift Activity -->
     <string name="edit_shift_label_name">Shift designation or name:</string>
     <string name="edit_shift_pick_starttime">Shift start time:</string>
     <string name="edit_shift_pick_endtime">Shift end time:</string>
     <string name="edit_shift_pick_color">Choose shift calendar color:</string>
+
+    <!-- Edit User Activity -->
+    <string name="edit_user_label_name">User login username:</string>
+    <string name="edit_user_label_password">User login password:</string>
+    <string name="edit_user_label_dni">User ID/DNI number:</string>
+    <string name="edit_user_label_fullname">Full user name:</string>
+
 
 </resources>

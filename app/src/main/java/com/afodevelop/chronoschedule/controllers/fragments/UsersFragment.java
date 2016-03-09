@@ -2,6 +2,7 @@ package com.afodevelop.chronoschedule.controllers.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,7 @@ public class UsersFragment extends Fragment {
     private View myFragmentView;
     private ListView listView;
     private ArrayAdapter arrayAdapter;
+    private FloatingActionButton addUserButton;
     private boolean isNew;
 
 
@@ -51,12 +53,26 @@ public class UsersFragment extends Fragment {
                                     int position, long id) {
                 Intent i = new Intent(getActivity(), UserFormActivity.class);
                 Bundle extras = new Bundle();
+                extras.putBoolean("isNew", false);
                 extras.putString("user", DEMO_USERS[position]);
                 i.putExtras(extras);
                 startActivity(i);
 
             }
         });
+
+        addUserButton = (FloatingActionButton) myFragmentView.findViewById(R.id.add_user_button);
+        addUserButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), UserFormActivity.class);
+                Bundle extras = new Bundle();
+                extras.putBoolean("isNew", true);
+                i.putExtras(extras);
+                startActivity(i);
+            }
+        });
+
 
         return myFragmentView;
     }
