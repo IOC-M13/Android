@@ -142,7 +142,7 @@ public class CalendarFragment extends Fragment {
                 Intent i = new Intent(getActivity(), DayFormActivity.class);
                 Bundle extras = new Bundle();
                 extras.putString("date", df.format(date));
-                extras.putString("user", DEMO_USERS[0]);
+                extras.putString("user", DEMO_USERS[3]);
                 i.putExtras(extras);
                 startActivity(i);
             }

@@ -77,11 +77,13 @@
 
 
         <TextView
+            android:id="@+id/edit_shiftday_spinner_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textSize="12sp"
-            android:text="@string/edit_shiftday_label_shift"/>
+            android:text="@string/edit_shiftday_label_shift"
+            android:visibility="gone"/>
 
         <Spinner
             android:id="@+id/edit_shiftday_spinner"
@@ -89,9 +91,77 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:background="@color/grey"
-            android:visibility="visible">
+            android:visibility="gone">
 
         </Spinner>
+
+
+        <LinearLayout
+            android:id="@+id/edit_shiftday_startime_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_menu_recent_history"
+                android:layout_marginRight="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:text="@string/edit_shiftday_show_startttime"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/edit_shiftday_text_starttime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="48sp"
+            android:text="22:00:00"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/edit_shiftday_endtime_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="15dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_menu_recent_history"
+                android:layout_marginRight="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:text="@string/edit_shiftday_show_endttime"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/edit_shiftday_text_endtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="48sp"
+            android:text="06:00:00"
+            android:visibility="gone"/>
+
+
+
 
     </LinearLayout>
 

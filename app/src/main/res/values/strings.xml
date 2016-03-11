@@ -28,6 +28,10 @@
     <string name="edit_shiftday_label_date">Day shift on date:</string>
     <string name="edit_shiftday_label_user">Day shift for user:</string>
     <string name="edit_shiftday_label_shift">Select shift:</string>
+    <string name="edit_shiftday_show_startttime">Journey start time:</string>
+    <string name="edit_shiftday_show_endttime">Journey end time:</string>
+
+
 
     <!-- Edit Shift Activity -->
     <string name="edit_shift_label_name">Shift designation or name:</string>
