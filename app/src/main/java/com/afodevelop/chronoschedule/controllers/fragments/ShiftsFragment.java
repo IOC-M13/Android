@@ -7,25 +7,26 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.activities.ShiftFormActivity;
+import com.afodevelop.chronoschedule.controllers.adapters.ShiftsListArrayAdapter;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by alex on 3/03/16.
  */
 public class ShiftsFragment extends Fragment {
 
-    // DEMO DATA
-    private final String[] DEMO_SHIFTS = {
+    //DEMO_DATA
+    ArrayList<String> DEMO_SHIFTS = new ArrayList<String>(Arrays.asList(
             "libre",
             "mañana",
             "tarde",
-            "noche",
-    };
+            "noche"));
 
     // COSTANTS
 
@@ -33,7 +34,7 @@ public class ShiftsFragment extends Fragment {
     // CLASSWIDE VARIABLES
     private View myFragmentView;
     private ListView listView;
-    private ArrayAdapter arrayAdapter;
+    private ShiftsListArrayAdapter arrayAdapter;
     private FloatingActionButton addShiftButton;
     private boolean isNew;
 
@@ -44,22 +45,11 @@ public class ShiftsFragment extends Fragment {
         myFragmentView = inflater.inflate(R.layout.shifts_fragment, container, false);
 
         listView = (ListView) myFragmentView.findViewById(R.id.shifts_list);
-        arrayAdapter = new ArrayAdapter(getActivity(), R.layout.users_shifts_listview, R.id.users_shift_itemname, DEMO_SHIFTS);
+        arrayAdapter = new ShiftsListArrayAdapter(getActivity(), R.layout.users_shifts_listview, DEMO_SHIFTS);
         listView.setAdapter(arrayAdapter);
 
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                Intent i = new Intent(getActivity(), ShiftFormActivity.class);
-                Bundle extras = new Bundle();
-                extras.putBoolean("isNew", false);
-                extras.putString("shift", DEMO_SHIFTS[position]);
-                i.putExtras(extras);
-                startActivity(i);
 
-            }
-        });
 
         addShiftButton = (FloatingActionButton) myFragmentView.findViewById(R.id.add_shift_button);
         addShiftButton.setOnClickListener(new View.OnClickListener() {

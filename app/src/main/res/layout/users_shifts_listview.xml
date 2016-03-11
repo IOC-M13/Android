@@ -7,15 +7,24 @@
     android:descendantFocusability="blocksDescendants">
 
     <ImageButton
-        android:id="@+id/users_shift_itemicon"
+        android:id="@+id/users_shift_deleteitem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_menu_delete"
+        android:layout_marginRight="7sp"
+        android:background="@null"
+        android:focusableInTouchMode="false"
+        android:focusable="false"/>
+
+    <ImageButton
+        android:id="@+id/users_shift_edititem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_menu_edit"
         android:layout_marginRight="15sp"
         android:background="@null"
         android:focusableInTouchMode="false"
-        android:focusable="false"
-        android:clickable="false"/>
+        android:focusable="false"/>
 
     <TextView
         android:id="@+id/users_shift_itemname"
