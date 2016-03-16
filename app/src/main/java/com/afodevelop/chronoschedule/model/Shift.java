@@ -1,4 +1,4 @@
-package com.afodevelop.chronoschedule.models;
+package com.afodevelop.chronoschedule.model;
 
 /**
  * Created by alex on 2/03/16.
@@ -7,16 +7,17 @@ public class Shift {
 
     //CLASSWIDE VARIABLES
     private int idShift;
-    private String name, startTime, endTime;
+    private String name, startTime, endTime, color;
 
     //CONSTRUCTORS
     public Shift() {}
 
-    public Shift(int id, String name, String strTime, String endTime){
+    public Shift(int id, String name, String strTime, String endTime, String color){
         this.idShift = id;
         this.name = name;
         this.startTime = strTime;
         this.endTime = endTime;
+        this.color = color;
     }
 
     //SETTERS AND GETTERS
@@ -51,5 +52,13 @@ public class Shift {
 
     public void setEndTime(String endTime) {
         this.endTime = endTime;
+    }
+
+    public String getColor(){
+        return color;
+    }
+
+    public void setColor(String color){
+        this.color = color;
     }
 }

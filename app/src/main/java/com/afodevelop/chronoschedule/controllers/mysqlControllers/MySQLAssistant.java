@@ -2,9 +2,9 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.models.Shift;
-import com.afodevelop.chronoschedule.models.User;
-import com.afodevelop.chronoschedule.models.UserShift;
+import com.afodevelop.chronoschedule.common.OrmCache;
+import com.afodevelop.chronoschedule.model.Shift;
+import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,9 +19,9 @@ public class MySQLAssistant {
 
 
     //CONSTANTS
-    private static final String USERS_SELECT = "SELECT * FROM 'mydb'.'Ususarios'";
-    private static final String SHIFTS_SELECT = "SELECT * FROM 'mydb'.'Turnos'";
-    private static final String USER_SHIFTS_SELECT = "SELECT * FROM 'mydb'.'TurnoUsuarios'";
+    private static final String USERS_SELECT = "SELECT * FROM Users";
+    private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
+    private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
 
     //CLASSWIDE VARIABLES
     private Connection mySQLConnection;
@@ -61,12 +61,13 @@ public class MySQLAssistant {
         ArrayList<Shift> result = new ArrayList<>();
 
         while (shifts.next()){
-            Shift shift = new Shift();
-            shift.setIdShift(shifts.getInt(0));
-            shift.setName(shifts.getString(1));
-            shift.setStartTime(shifts.getString(2));
-            shift.setEndTime(shifts.getString(3));
-            result.add(shift);
+            result.add(new Shift(
+                    shifts.getInt(0),
+                    shifts.getString(1),
+                    shifts.getString(2),
+                    shifts.getString(3),
+                    shifts.getString(4)
+            ));
         }
         closeConnection();
 
@@ -92,14 +93,14 @@ public class MySQLAssistant {
         ArrayList<User> result = new ArrayList<>();
 
         while (users.next()){
-            User user = new User();
-            user.setIdUser(users.getInt(0));
-            user.setDniUser(users.getString(1));
-            user.setUserName(users.getString(2));
-            user.setRealName(users.getString(3));
-            user.setPass(users.getString(4));
-            user.setAdmin(users.getInt(5));
-            result.add(user);
+            result.add(new User(
+                    users.getInt(0),
+                    users.getInt(5),
+                    users.getString(1),
+                    users.getString(2),
+                    users.getString(3),
+                    users.getString(4)
+            ));
         }
         closeConnection();
 
@@ -119,30 +120,15 @@ public class MySQLAssistant {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ArrayList<UserShift> getUserShiftsResultSet()
+    public OrmCache InitializeUserShiftCache(OrmCache cache)
             throws SQLException, ClassNotFoundException {
-
         ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
-        ArrayList<UserShift> result = new ArrayList<>();
 
         while (userShifts.next()){
-            UserShift userShift = new UserShift();
-            userShift.setIdUser(userShifts.getInt(0));
-            userShift.setIdShift(userShifts.getInt(1));
-            userShift.setDate(userShifts.getString(2));
-
-            result.add(userShift);
+            cache.addUserShift(userShifts.getInt(0),userShifts.getInt(1),userShifts.getDate(2));
         }
         closeConnection();
-
-        int size = result.size();
-        if (size > 0){
-            Log.d("JDBC", size + "UserShifts entries retrieved from database ");
-            return result;
-        } else {
-            Log.d("JDBC","No UserShifts entries could be retrieved from database ");
-            return null;
-        }
+        return cache;
     }
 
     /**

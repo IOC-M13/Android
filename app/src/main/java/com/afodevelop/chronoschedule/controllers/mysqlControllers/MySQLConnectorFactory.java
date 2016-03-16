@@ -2,6 +2,8 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
+import com.afodevelop.chronoschedule.common.JdbcException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,21 +22,19 @@ public class MySQLConnectorFactory {
 
 
     //CONSTRUCTOR
-    public boolean mySQLConnectorFactory(
+    public MySQLConnectorFactory(
             String host, String port, String dbName, String dbUser, String dbUserPassword)
-            throws SQLException {
+            throws JdbcException {
 
         if ( host != null && port != null && dbName != null && dbUser != null
                 && dbUserPassword != null){
             url = "jdbc:mysql://" + host + ":" +	port + "/" + dbName;
             initialized = true;
-            return initialized;
         } else {
             Log.e("JDBC", "null argument provided for jdbc url assembling");
-            throw new SQLException ("While assembling MySQL connection jdbc url:" +
+            throw new JdbcException ("While assembling MySQL connection jdbc url:" +
                     " null value parameter detected.");
         }
-
     }
 
     // LOGIC METHODS
@@ -44,7 +44,7 @@ public class MySQLConnectorFactory {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    private void stablishConnection() throws ClassNotFoundException, SQLException {
+    private void establishConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.jdbc.Driver");
         mySQLConnection = DriverManager.getConnection(url, dbUser, dbUserPassword);
 
@@ -60,7 +60,7 @@ public class MySQLConnectorFactory {
 
         if (initialized) {
             if (mySQLConnection == null) {
-                stablishConnection();
+                establishConnection();
             }
             return mySQLConnection;
         } else {

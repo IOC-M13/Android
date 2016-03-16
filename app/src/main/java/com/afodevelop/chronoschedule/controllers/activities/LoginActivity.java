@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,18 +15,31 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
+import com.afodevelop.chronoschedule.common.JdbcException;
+import com.afodevelop.chronoschedule.common.OrmCache;
+import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
+import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
+
+import java.sql.SQLException;
 
 /**
  * A login screen that offers login via username/password.
  */
 public class LoginActivity extends AppCompatActivity {
+
+
+    // CONSTANTS
+    private static final int APP_CALL_ID = 0;
+    private static final String SP_NAME = "Preferences";
+    private static final String SP_KEY_DBHOST = "dbHost";
+    private static final String SP_KEY_DBPORT = "dbPort";
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -34,24 +48,85 @@ public class LoginActivity extends AppCompatActivity {
     private static final String[] DUMMY_CREDENTIALS = new String[]{
             "alex:123456", "oscar:678910", "admin:123456"
     };
+
+
+    // CLASS-WIDE VARIABLES
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
+    private boolean connectivity, firstExecution;
+    private String dbHost, dbPort;
+    MySQLConnectorFactory mySQLConnectorFactory;
+    MySQLAssistant mySQLAssistant;
     private UserLoginTask mAuthTask = null;
 
-    // UI references.
     private EditText mUsernameView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
 
+
+    // LOGIC
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Initialize the shared preferences
+        SharedPreferences lastState = getSharedPreferences(SP_NAME, MODE_PRIVATE);
+        dbHost = lastState.getString(SP_KEY_DBHOST, "");
+        dbPort = lastState.getString(SP_KEY_DBPORT, "");
+
+        // Check Shared Preferences
+        if (dbHost.equalsIgnoreCase("")) {
+            firstExecution = true;
+            launchSettings();
+        } else {
+            firstExecution = false;
+        }
+
+        // Initialize MySQL controller
+        try {
+            mySQLConnectorFactory = new MySQLConnectorFactory(
+                    dbHost, dbPort,"dbChronoSchedule","standard","1234");
+            mySQLAssistant = new MySQLAssistant(mySQLConnectorFactory);
+        } catch (JdbcException e) {
+            e.printStackTrace();
+            printToast("JDBC initialization error");
+        }
+
+        // Initialize SQLite controller
+
+
+        // Setup periodic event trigger
+
+
+
+        // Early Check connectivity
+        connectivity = checkConnectivity();
+
+
+        // Main logic flow happens here...
+        if (firstExecution) {
+            if (connectivity) {
+                launchResync();
+            } else {
+                printToast("Fatal error: Neither cached data" +
+                        " nor database connection available.\n" +
+                        "Exiting now.");
+                finish();
+            }
+        } else {
+            if (connectivity) {
+                launchResync();
+            }
+        }
+
+
+
         // Set up the login form.
         mUsernameView = (EditText) findViewById(R.id.username);
-
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -65,7 +140,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         Button mUsernameSignInButton = (Button) findViewById(R.id.sign_in_button);
-        mUsernameSignInButton.setOnClickListener(new OnClickListener() {
+        mUsernameSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -76,6 +151,11 @@ public class LoginActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    /**
+     *
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -83,8 +163,31 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * This method is used to persist connection details as
+     * shared preferences
+     * @param host a string with host name or IP address
+     * @param port a string with MySQL listen port
+     */
+    protected void storePreferences(String host, String port){
+        // Summon the SharedPreferences instance
+        SharedPreferences lastState = getSharedPreferences(SP_NAME, MODE_PRIVATE);
+        // get the preferences editor to manipulate them
+        SharedPreferences.Editor editor = lastState.edit();
+        // Tag and write the iD int value into SharedPreferences
+        editor.putString(SP_KEY_DBHOST, host);
+        editor.putString(SP_KEY_DBPORT, port);
+        // Commit changes made through editor
+        editor.commit();
+    }
 
-
+    /**
+     *
+     * @return
+     */
+    private boolean checkConnectivity(){
+        return mySQLAssistant.checkConnectivity();
+    }
 
 
     /**
@@ -139,11 +242,21 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     *
+     * @param username
+     * @return
+     */
     private boolean isUsernameValid(String username) {
         //TODO: Replace this with your own logic
         return true;
     }
 
+    /**
+     *
+     * @param password
+     * @return
+     */
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 4;
@@ -185,6 +298,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     *
+     * @param user
+     */
     private void signIn(String user) {
         Bundle extras = new Bundle();
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
@@ -198,13 +315,58 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    private void refreshPressed() {
+    /**
+     *
+     */
+    private void launchResync() {
+        //TODO all this should be done in an Async task?
+
+        OrmCache dataCache = new OrmCache();
+        try {
+            // Read and Cache MySQL data in memory
+            dataCache.setShiftsList(mySQLAssistant.getShiftsResultSet());
+            dataCache.setUsersList(mySQLAssistant.getUserResultSet());
+            dataCache = mySQLAssistant.InitializeUserShiftCache(dataCache);
+            // Dump cache data into SQLite
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    private void settingsPressed() {
+    /**
+     * This method launches the settings activity passing it the
+     * current connection data.
+     */
+    private void launchSettings() {
         Intent i = new Intent(LoginActivity.this, SettingsActivity.class);
-        startActivity(i);
+        Bundle extras = new Bundle();
+        extras.putString(SP_KEY_DBHOST,dbHost);
+        extras.putString(SP_KEY_DBPORT,dbPort);
+        startActivityForResult(i,APP_CALL_ID);
+    }
+
+    /**
+     * Manage return from Activity calls
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        Bundle extras;
+        if(requestCode == APP_CALL_ID)
+        {
+            if(resultCode == RESULT_OK)
+            {
+                extras = data.getExtras();
+                dbPort = extras.getString(SP_KEY_DBPORT);
+                dbHost = extras.getString(SP_KEY_DBHOST);
+            }
+        }
     }
 
     /**
@@ -264,20 +426,32 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * Handle ActionBar Items press
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
             case R.id.refresh:
-                refreshPressed();
+                launchResync();
                 break;
 
             case R.id.preferences:
-                settingsPressed();
+                launchSettings();
                 break;
         }
         return true;
+    }
+
+    /**
+     * An auxiliare method to ease Toast printing
+     * @param s
+     */
+    private void printToast(String s){
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 }
 

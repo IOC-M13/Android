@@ -1,4 +1,4 @@
-package com.afodevelop.chronoschedule.models;
+package com.afodevelop.chronoschedule.model;
 
 /**
  * Created by alex on 2/03/16.
