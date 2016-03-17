@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,6 +27,7 @@ import com.afodevelop.chronoschedule.common.JdbcException;
 import com.afodevelop.chronoschedule.common.OrmCache;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
+import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
 
 import java.sql.SQLException;
 
@@ -49,6 +51,64 @@ public class LoginActivity extends AppCompatActivity {
             "alex:123456", "oscar:678910", "admin:123456"
     };
 
+    // INTERNAL CLASS DEFINITIONS
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+
+        private final String mUsername;
+        private final String mPassword;
+
+        UserLoginTask(String username, String password) {
+            mUsername = username;
+            mPassword = password;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            // TODO: attempt authentication against a network service.
+
+            try {
+                // Simulate network access.
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                return false;
+            }
+
+            for (String credential : DUMMY_CREDENTIALS) {
+                String[] pieces = credential.split(":");
+                if (pieces[0].equals(mUsername)) {
+                    // Account exists, return true if the password matches.
+                    return pieces[1].equals(mPassword);
+                }
+            }
+
+            // TODO: register the new account here.
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            mAuthTask = null;
+            showProgress(false);
+
+            if (success) {
+                signIn(mUsername);
+            } else {
+                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                mPasswordView.requestFocus();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            mAuthTask = null;
+            showProgress(false);
+        }
+    }
+
 
     // CLASS-WIDE VARIABLES
     /**
@@ -58,6 +118,7 @@ public class LoginActivity extends AppCompatActivity {
     private String dbHost, dbPort;
     MySQLConnectorFactory mySQLConnectorFactory;
     MySQLAssistant mySQLAssistant;
+    SQLiteAssistant mySQLiteAssistant;
     private UserLoginTask mAuthTask = null;
 
     private EditText mUsernameView;
@@ -84,48 +145,47 @@ public class LoginActivity extends AppCompatActivity {
             launchSettings();
         } else {
             firstExecution = false;
-        }
 
-        // Initialize MySQL controller
+            initializeMySQL();
+            initializeSQLite();
+            connectivity = checkConnectivity();
+            execute();
+        }
+    }
+
+    /**
+     *
+     * @param menu
+     * @return
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.login_menu, menu);
+        return true;
+    }
+
+    private void initializeMySQL(){
+        Log.d("initializeMySQL", "asked to initialize MySQL");
         try {
             mySQLConnectorFactory = new MySQLConnectorFactory(
-                    dbHost, dbPort,"dbChronoSchedule","standard","1234");
-            mySQLAssistant = new MySQLAssistant(mySQLConnectorFactory);
+                    dbHost, dbPort, "dbChronoSchedule", "standard", "1234");
+            mySQLAssistant = MySQLAssistant.getInstance();
+            mySQLAssistant.initialize(mySQLConnectorFactory);
         } catch (JdbcException e) {
             e.printStackTrace();
             printToast("JDBC initialization error");
         }
+    }
 
-        // Initialize SQLite controller
+    private void initializeSQLite(){
+        Log.d("initializeSQLite","asked to initialize SQLite");
+        mySQLiteAssistant = SQLiteAssistant.getInstance();
+    }
 
-
-        // Setup periodic event trigger
-
-
-
-        // Early Check connectivity
-        connectivity = checkConnectivity();
-
-
-        // Main logic flow happens here...
-        if (firstExecution) {
-            if (connectivity) {
-                launchResync();
-            } else {
-                printToast("Fatal error: Neither cached data" +
-                        " nor database connection available.\n" +
-                        "Exiting now.");
-                finish();
-            }
-        } else {
-            if (connectivity) {
-                launchResync();
-            }
-        }
-
-
-
+    private void renderUI(){
         // Set up the login form.
+        Log.d("renderUI","Asked to render the UI");
         mUsernameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -151,16 +211,24 @@ public class LoginActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.login_progress);
     }
 
-    /**
-     *
-     * @param menu
-     * @return
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.login_menu, menu);
-        return true;
+    private void execute(){
+        Log.d("execute","firstexecution: " + firstExecution + ", connectivity: " + connectivity);
+        // Main logic flow happens here...
+        if (firstExecution) {
+            if (connectivity) {
+                launchResync();
+            } else {
+                printToast("Fatal error: Neither cached data" +
+                        " nor database connection available.\n" +
+                        "Exiting now.");
+                finish();
+            }
+        } else {
+            if (connectivity) {
+                launchResync();
+                renderUI();
+            }
+        }
     }
 
     /**
@@ -186,7 +254,13 @@ public class LoginActivity extends AppCompatActivity {
      * @return
      */
     private boolean checkConnectivity(){
-        return mySQLAssistant.checkConnectivity();
+        try {
+            Log.d("checkConnectivity","check connectivity");
+            return mySQLAssistant.checkConnectivity();
+        } catch (JdbcException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
@@ -316,22 +390,26 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * This method triggers MySQL -> SQLite sync
      */
     private void launchResync() {
         //TODO all this should be done in an Async task?
-
+        Log.d("launchResync", "resync called");
         OrmCache dataCache = new OrmCache();
         try {
             // Read and Cache MySQL data in memory
             dataCache.setShiftsList(mySQLAssistant.getShiftsResultSet());
             dataCache.setUsersList(mySQLAssistant.getUserResultSet());
             dataCache = mySQLAssistant.InitializeUserShiftCache(dataCache);
-            // Dump cache data into SQLite
+
+            //Dump cached data into SQLite
+            mySQLiteAssistant.persistOrmCache(dataCache);
 
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (JdbcException e) {
             e.printStackTrace();
         }
 
@@ -342,10 +420,12 @@ public class LoginActivity extends AppCompatActivity {
      * current connection data.
      */
     private void launchSettings() {
+        Log.d("launchSettings","setingsActivity");
         Intent i = new Intent(LoginActivity.this, SettingsActivity.class);
         Bundle extras = new Bundle();
-        extras.putString(SP_KEY_DBHOST,dbHost);
-        extras.putString(SP_KEY_DBPORT,dbPort);
+        extras.putString(SP_KEY_DBHOST, dbHost);
+        extras.putString(SP_KEY_DBPORT, dbPort);
+        i.putExtras(extras);
         startActivityForResult(i,APP_CALL_ID);
     }
 
@@ -362,69 +442,24 @@ public class LoginActivity extends AppCompatActivity {
         {
             if(resultCode == RESULT_OK)
             {
+                Log.d("onActivityResult","RESULT_OK");
                 extras = data.getExtras();
                 dbPort = extras.getString(SP_KEY_DBPORT);
                 dbHost = extras.getString(SP_KEY_DBHOST);
-            }
-        }
-    }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mUsername;
-        private final String mPassword;
-
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mUsername)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                initializeMySQL();
+                initializeSQLite();
+                connectivity = checkConnectivity();
+                execute();
+            } else {
+                if (firstExecution) {
+                    finish();
                 }
             }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                signIn(mUsername);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
         }
     }
+
+
 
     /**
      * Handle ActionBar Items press

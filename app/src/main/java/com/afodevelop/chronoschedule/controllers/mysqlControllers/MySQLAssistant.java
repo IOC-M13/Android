@@ -2,6 +2,7 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
+import com.afodevelop.chronoschedule.common.JdbcException;
 import com.afodevelop.chronoschedule.common.OrmCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
@@ -24,15 +25,46 @@ public class MySQLAssistant {
     private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
 
     //CLASSWIDE VARIABLES
+    private static MySQLAssistant ourInstance = null;
+    private boolean initialized;
     private Connection mySQLConnection;
     private MySQLConnectorFactory mySQLConnectorFactory;
 
     //CONSTRUCTOR
-    public MySQLAssistant(MySQLConnectorFactory factory){
+    private MySQLAssistant(){}
+
+
+
+    //LOGIC
+
+    /**
+     * Singleton get instance method
+     * @return
+     */
+    public static MySQLAssistant getInstance(){
+        if (ourInstance == null){
+            ourInstance = new MySQLAssistant();
+        }
+        return ourInstance;
+    }
+
+    /**
+     * This method initializes the MySQLAssistant with a MySQLConnectionFactory
+     * @param factory a pre-configured MySQLConnectorFactory
+     */
+    public void initialize(MySQLConnectorFactory factory){
+        initialized = true;
         this.mySQLConnectorFactory = factory;
     }
 
-    //LOGIC
+    /**
+     * This method allow to query wether the Assistant has been properly
+     * initialized.
+     * @return eiter true or false
+     */
+    public boolean isInitialized(){
+        return initialized;
+    }
 
     /**
      *
@@ -41,12 +73,17 @@ public class MySQLAssistant {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    private ResultSet queryDatabase(String sqlQuery) throws SQLException, ClassNotFoundException {
-        openConnection();
-        Statement st = mySQLConnection.createStatement();
-        ResultSet rs = st.executeQuery(sqlQuery);
-        Log.d("JDBC","Executed query: " + sqlQuery );
-        return rs;
+    private ResultSet queryDatabase(String sqlQuery) throws SQLException, ClassNotFoundException,
+            JdbcException {
+        if (initialized) {
+            openConnection();
+            Statement st = mySQLConnection.createStatement();
+            ResultSet rs = st.executeQuery(sqlQuery);
+            Log.d("JDBC", "Executed query: " + sqlQuery);
+            return rs;
+        } else {
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
+        }
     }
 
     /**
@@ -55,7 +92,8 @@ public class MySQLAssistant {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ArrayList<Shift> getShiftsResultSet() throws SQLException, ClassNotFoundException {
+    public ArrayList<Shift> getShiftsResultSet() throws SQLException, ClassNotFoundException,
+            JdbcException {
 
         ResultSet shifts = queryDatabase(SHIFTS_SELECT);
         ArrayList<Shift> result = new ArrayList<>();
@@ -87,7 +125,7 @@ public class MySQLAssistant {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public ArrayList<User> getUserResultSet() throws SQLException, ClassNotFoundException {
+    public ArrayList<User> getUserResultSet() throws SQLException, ClassNotFoundException, JdbcException {
 
         ResultSet users = queryDatabase(USERS_SELECT);
         ArrayList<User> result = new ArrayList<>();
@@ -121,7 +159,7 @@ public class MySQLAssistant {
      * @throws ClassNotFoundException
      */
     public OrmCache InitializeUserShiftCache(OrmCache cache)
-            throws SQLException, ClassNotFoundException {
+            throws SQLException, ClassNotFoundException, JdbcException {
         ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
 
         while (userShifts.next()){
@@ -135,7 +173,7 @@ public class MySQLAssistant {
      *
      * @return
      */
-    public boolean checkConnectivity(){
+    public boolean checkConnectivity() throws JdbcException {
         try {
             openConnection();
             closeConnection();
@@ -155,18 +193,26 @@ public class MySQLAssistant {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public void openConnection() throws SQLException, ClassNotFoundException {
+    public void openConnection() throws SQLException, ClassNotFoundException, JdbcException {
+        if (initialized) {
         Log.d("JDBC","openning database");
-       mySQLConnection = mySQLConnectorFactory.getInstance();
+        mySQLConnection = mySQLConnectorFactory.getConnection();
+        } else {
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
+        }
     }
 
     /**
      *
      * @throws SQLException
      */
-    public void closeConnection() throws SQLException {
-        Log.d("JDBC","closing database");
-        mySQLConnection.close();
+    public void closeConnection() throws SQLException, JdbcException {
+        if (initialized) {
+            Log.d("JDBC","closing database");
+            mySQLConnection.close();
+        } else {
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
+        }
     }
 
 

@@ -19,21 +19,6 @@ import java.util.ArrayList;
  */
 public class SQLiteAssistant {
 
-    // Private instantiation of the object
-    private static SQLiteAssistant ourInstance = new SQLiteAssistant();
-
-    // This getter provides the single existant instance
-    public static SQLiteAssistant getInstance() {
-        return ourInstance;
-    }
-
-    /**
-     * SQLiteAssistant is a singleton, so it has a private constructor
-     */
-    private SQLiteAssistant() {}
-
-    //ClassWide Declarations
-
     //CONSTANTS
     protected static final int VERSION = 1;
     protected static final String TAG = "SQLConnection";
@@ -56,6 +41,9 @@ public class SQLiteAssistant {
             + KEY_USER_PASS + " TEXT , "
             + KEY_USER_ADMIN + " INTEGER );";
 
+    protected static final String DB_CLEAR_USERS = "" +
+            "DELETE FROM " + DB_USER_TABLE +";";
+
     protected static final String DB_SHIFT_TABLE = "Shifts";
     protected static final String KEY_SHIFT_IDSHIFT = "idShift";
     protected static final String KEY_SHIFT_NAME = "name";
@@ -70,6 +58,10 @@ public class SQLiteAssistant {
             + KEY_SHIFT_STARTTIME + " TEXT, "
             + KEY_SHIFT_ENDTIME + " TEXT, "
             + KEY_SHIFT_COLOR + " TEXT );";
+
+    protected static final String DB_CLEAR_SHIFTS = "" +
+            "DELETE FROM " + DB_SHIFT_TABLE +";";
+
 
     protected static final String DB_USERSHIFT_TABLE = "UserShifts";
     protected static final String KEY_USERSHIFT_IDUSER = "idUser";
@@ -86,6 +78,9 @@ public class SQLiteAssistant {
             + KEY_USERSHIFT_IDSHIFT + ", "
             + KEY_USERSHIFT_DATE + "));";
 
+    protected static final String DB_CLEAR_USERSSHIFTS = "" +
+            "DELETE FROM " + DB_USERSHIFT_TABLE +";";
+
     protected static final String DB_UPDATE_USERS = "" +
             "DROP TABLE IF EXISTS " + DB_USER_TABLE +"; ";
     protected static final String DB_UPDATE_SHIFTS = "" +
@@ -94,10 +89,7 @@ public class SQLiteAssistant {
             "DROP TABLE IF EXISTS " + DB_USERSHIFT_TABLE +"; ";
 
 
-    //Logic Variables
-    private Context context;
-    private SQLiteHelper sQLiteHelper;
-    private SQLiteDatabase db;
+    // INTERNAL CLASSES
 
     /**
      * This is an internal SQLiteOpenHelper class!!
@@ -136,21 +128,28 @@ public class SQLiteAssistant {
 
     } // <- END OF INNER CLASS!!!
 
+    // CLASS-WIDE VARIABLES
+    private static SQLiteAssistant ourInstance = null;
+    private SQLiteHelper sQLiteHelper;
+    private SQLiteDatabase db;
+
+    // CONSTRUCTOR
+    /**
+     * SQLiteAssistant is a singleton, so it has a private constructor
+     */
+    private SQLiteAssistant() {}
+
+
     // LOGIC & METHODS
 
     /**
-     * This method acts as a class initializator. It initializes the context and instantiates
-     * The internal SQliteHelper instance with that same context.
+     * This getter provides the single existant instance
      */
-    public void initialize(Context c) throws Exception {
-        // We set the context
-        if (context == null){
-            context = c;
-            //we instantiate the SqliteHelper
-            sQLiteHelper = new SQLiteHelper(context);
-        } else {
-            throw new Exception("Context already initialized on RSSFeedAssistant");
+    public static SQLiteAssistant getInstance() {
+        if (ourInstance == null) {
+            ourInstance = new SQLiteAssistant();
         }
+        return ourInstance;
     }
 
     /**
@@ -261,6 +260,7 @@ public class SQLiteAssistant {
     public ArrayList<Long> insertUsers(ArrayList<User> users){
         ArrayList<Long> result = new ArrayList<>();
         openDb();
+        db.execSQL(DB_CLEAR_USERS);
         for (User u: users) {
             result.add(putUser(u));
         }
@@ -276,6 +276,7 @@ public class SQLiteAssistant {
     public ArrayList<Long> insertShifts(ArrayList<Shift> shifts){
         ArrayList<Long> result = new ArrayList<>();
         openDb();
+        db.execSQL(DB_CLEAR_SHIFTS);
         for (Shift s: shifts) {
             result.add(putShift(s));
         }
@@ -292,6 +293,7 @@ public class SQLiteAssistant {
     public ArrayList<Long> insertUserShifts(ArrayList<UserShift> userShifts) {
         ArrayList<Long> result = new ArrayList<>();
         openDb();
+        db.execSQL(DB_CLEAR_USERSSHIFTS);
         for (UserShift us : userShifts) {
             result.add(putUserShift(us));
         }
@@ -303,7 +305,7 @@ public class SQLiteAssistant {
      * Insert a whole ORMCache objects container into DB
      * @param cache
      */
-    private void persistOrmCache(OrmCache cache){
+    public void persistOrmCache(OrmCache cache){
         insertUsers(cache.getUsersList());
         insertShifts(cache.getShiftsList());
         insertUserShifts(cache.getUserShiftsList());

@@ -17,19 +17,24 @@ public class MySQLConnectorFactory {
 
     // CLASSWIDE VARIABLES
     Connection mySQLConnection = null;
-    String url, dbUser, dbUserPassword;
+    String dbHost, dbPort, dbName, dbUser, dbUserPassword, dbUrl;
     boolean initialized = false;
 
 
     //CONSTRUCTOR
     public MySQLConnectorFactory(
-            String host, String port, String dbName, String dbUser, String dbUserPassword)
+            String host, String port, String name, String user, String pass)
             throws JdbcException {
 
-        if ( host != null && port != null && dbName != null && dbUser != null
-                && dbUserPassword != null){
-            url = "jdbc:mysql://" + host + ":" +	port + "/" + dbName;
-            initialized = true;
+        if ( host != null && port != null && name != null && user != null && pass != null){
+            this.dbHost = host;
+            this.dbPort = port;
+            this.dbName = name;
+            this.dbUser = user;
+            this.dbUserPassword = pass;
+            this.dbUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
+            this.initialized = true;
+            Log.d("JDBC", "URL: " + dbUrl);
         } else {
             Log.e("JDBC", "null argument provided for jdbc url assembling");
             throw new JdbcException ("While assembling MySQL connection jdbc url:" +
@@ -46,7 +51,10 @@ public class MySQLConnectorFactory {
      */
     private void establishConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.jdbc.Driver");
-        mySQLConnection = DriverManager.getConnection(url, dbUser, dbUserPassword);
+        Log.d("establishConnection","URL: " + dbUrl);
+        Log.d("establishConnection","User: " + dbUser);
+        Log.d("establishConnection","Pass: " + dbUserPassword);
+        mySQLConnection = DriverManager.getConnection(dbUrl, dbUser, dbUserPassword);
 
     }
 
@@ -56,7 +64,7 @@ public class MySQLConnectorFactory {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public Connection getInstance() throws SQLException, ClassNotFoundException {
+    public Connection getConnection() throws SQLException, ClassNotFoundException {
 
         if (initialized) {
             if (mySQLConnection == null) {
@@ -74,7 +82,7 @@ public class MySQLConnectorFactory {
     }
 
     public String getUrl() {
-        return url;
+        return dbUrl;
     }
 
     public String getDbUser(){
