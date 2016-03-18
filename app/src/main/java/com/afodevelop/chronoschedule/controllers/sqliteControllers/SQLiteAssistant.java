@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.common.OrmCache;
+import com.afodevelop.chronoschedule.controllers.ormControllers.ORMCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 import com.afodevelop.chronoschedule.model.UserShift;
@@ -132,6 +132,8 @@ public class SQLiteAssistant {
     private static SQLiteAssistant ourInstance = null;
     private SQLiteHelper sQLiteHelper;
     private SQLiteDatabase db;
+    private Context context;
+    private boolean initialized;
 
     // CONSTRUCTOR
     /**
@@ -141,6 +143,21 @@ public class SQLiteAssistant {
 
 
     // LOGIC & METHODS
+    /**
+     * This method acts as a class initializator. It initializes the context and instantiates
+     * The internal SQliteHelper instance with that same context.
+     */
+    public void initialize(Context c) throws SQLiteException {
+        // We set the context
+        if (context == null){
+            context = c;
+            //we instantiate the SqliteHelper
+            sQLiteHelper = new SQLiteHelper(context);
+            initialized = true;
+        } else {
+            throw new SQLiteException("Context already initialized on RSSFeedAssistant");
+        }
+    }
 
     /**
      * This getter provides the single existant instance
@@ -155,15 +172,23 @@ public class SQLiteAssistant {
     /**
      * Open Database connection
      */
-    public void openDb(){
-        db = sQLiteHelper.getWritableDatabase();
+    public void openDb() throws SQLiteException {
+        if (initialized) {
+            db = sQLiteHelper.getWritableDatabase();
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
      * Close Database connection
      */
-    public void closeDb(){
-        sQLiteHelper.close();
+    public void closeDb() throws SQLiteException {
+        if (initialized) {
+            sQLiteHelper.close();
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -171,17 +196,21 @@ public class SQLiteAssistant {
      * @param user an User object which has to be persisted
      * @return long with row ID or -1 if error
      */
-    private long putUser(User user){
-        // Load data from argument
-        ContentValues newValues = new ContentValues();
-        newValues.put(KEY_USER_IDUSER, user.getIdUser());
-        newValues.put(KEY_USER_USERDNI, user.getDniUser());
-        newValues.put(KEY_USER_USERNAME, user.getUserName());
-        newValues.put(KEY_USER_REALNAME, user.getRealName());
-        newValues.put(KEY_USER_PASS, user.getPass());
-        newValues.put(KEY_USER_ADMIN, user.getAdmin());
-        // return row ID
-        return db.insert(DB_USER_TABLE, null, newValues);
+    private long putUser(User user) throws SQLiteException {
+        if (initialized) {
+            // Load data from argument
+            ContentValues newValues = new ContentValues();
+            newValues.put(KEY_USER_IDUSER, user.getIdUser());
+            newValues.put(KEY_USER_USERDNI, user.getDniUser());
+            newValues.put(KEY_USER_USERNAME, user.getUserName());
+            newValues.put(KEY_USER_REALNAME, user.getRealName());
+            newValues.put(KEY_USER_PASS, user.getPass());
+            newValues.put(KEY_USER_ADMIN, user.getAdmin());
+            // return row ID
+            return db.insert(DB_USER_TABLE, null, newValues);
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -189,16 +218,20 @@ public class SQLiteAssistant {
      * @param shift a Shift object which has to be persisted
      * @return ong with row ID or -1 if error
      */
-    private long putShift(Shift shift){
-        // Load data from argument
-        ContentValues newValues = new ContentValues();
-        newValues.put(KEY_SHIFT_IDSHIFT, shift.getIdShift());
-        newValues.put(KEY_SHIFT_NAME, shift.getName());
-        newValues.put(KEY_SHIFT_STARTTIME, shift.getStartTime());
-        newValues.put(KEY_SHIFT_ENDTIME, shift.getEndTime());
-        newValues.put(KEY_SHIFT_COLOR, shift.getColor());
-        // return row ID
-        return db.insert(DB_SHIFT_TABLE, null, newValues);
+    private long putShift(Shift shift) throws SQLiteException {
+        if (initialized) {
+            // Load data from argument
+            ContentValues newValues = new ContentValues();
+            newValues.put(KEY_SHIFT_IDSHIFT, shift.getIdShift());
+            newValues.put(KEY_SHIFT_NAME, shift.getName());
+            newValues.put(KEY_SHIFT_STARTTIME, shift.getStartTime());
+            newValues.put(KEY_SHIFT_ENDTIME, shift.getEndTime());
+            newValues.put(KEY_SHIFT_COLOR, shift.getColor());
+            // return row ID
+            return db.insert(DB_SHIFT_TABLE, null, newValues);
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -206,14 +239,18 @@ public class SQLiteAssistant {
      * @param userShift a UserShift object which has to be persisted
      * @return ong with row ID or -1 if error
      */
-    private long putUserShift(UserShift userShift){
-        // Load data from argument
-        ContentValues newValues = new ContentValues();
-        newValues.put(KEY_USERSHIFT_IDUSER, userShift.getuser().getIdUser());
-        newValues.put(KEY_USERSHIFT_IDSHIFT, userShift.getShift().getIdShift());
-        newValues.put(KEY_USERSHIFT_DATE, userShift.getDate().toString());
-        // return row ID
-        return db.insert(DB_SHIFT_TABLE, null, newValues);
+    private long putUserShift(UserShift userShift) throws SQLiteException {
+        if (initialized) {
+            // Load data from argument
+            ContentValues newValues = new ContentValues();
+            newValues.put(KEY_USERSHIFT_IDUSER, userShift.getuser().getIdUser());
+            newValues.put(KEY_USERSHIFT_IDSHIFT, userShift.getShift().getIdShift());
+            newValues.put(KEY_USERSHIFT_DATE, userShift.getDate().toString());
+            // return row ID
+            return db.insert(DB_USERSHIFT_TABLE, null, newValues);
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -221,11 +258,15 @@ public class SQLiteAssistant {
      * @param user an User object to be persisted
      * @return
      */
-    public long insertUser(User user){
-        openDb();
-        long result =  putUser(user);
-        closeDb();
-        return result;
+    public long insertUser(User user) throws SQLiteException {
+        if (initialized) {
+            openDb();
+            long result =  putUser(user);
+            closeDb();
+            return result;
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -233,11 +274,15 @@ public class SQLiteAssistant {
      * @param shift a Shift object to be persisted
      * @return
      */
-    public long insertShift(Shift shift){
-        openDb();
-        long result =  putShift(shift);
-        closeDb();
-        return result;
+    public long insertShift(Shift shift) throws SQLiteException {
+        if (initialized) {
+            openDb();
+            long result =  putShift(shift);
+            closeDb();
+            return result;
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -245,11 +290,15 @@ public class SQLiteAssistant {
      * @param userShift a UserShift object to be persisted
      * @return
      */
-    public long insertUserShift(UserShift userShift){
-        openDb();
-        long result =  putUserShift(userShift);
-        closeDb();
-        return result;
+    public long insertUserShift(UserShift userShift) throws SQLiteException {
+        if (initialized) {
+            openDb();
+            long result =  putUserShift(userShift);
+            closeDb();
+            return result;
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
     /**
@@ -257,15 +306,19 @@ public class SQLiteAssistant {
      * @param users an array of User objects to be persisited
      * @return an array of longs with all inserted row ids
      */
-    public ArrayList<Long> insertUsers(ArrayList<User> users){
-        ArrayList<Long> result = new ArrayList<>();
-        openDb();
-        db.execSQL(DB_CLEAR_USERS);
-        for (User u: users) {
-            result.add(putUser(u));
+    public ArrayList<Long> insertUsers(ArrayList<User> users) throws SQLiteException {
+        if (initialized) {
+            ArrayList<Long> result = new ArrayList<>();
+            openDb();
+            db.execSQL(DB_CLEAR_USERS);
+            for (User u: users) {
+                result.add(putUser(u));
+            }
+            closeDb();
+            return result;
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
-        closeDb();
-        return result;
     }
 
     /**
@@ -273,15 +326,19 @@ public class SQLiteAssistant {
      * @param shifts an array of Shift objects to be persisited
      * @return an array of longs with all inserted row ids
      */
-    public ArrayList<Long> insertShifts(ArrayList<Shift> shifts){
-        ArrayList<Long> result = new ArrayList<>();
-        openDb();
-        db.execSQL(DB_CLEAR_SHIFTS);
-        for (Shift s: shifts) {
-            result.add(putShift(s));
+    public ArrayList<Long> insertShifts(ArrayList<Shift> shifts) throws SQLiteException {
+        if (initialized) {
+            ArrayList<Long> result = new ArrayList<>();
+            openDb();
+            db.execSQL(DB_CLEAR_SHIFTS);
+            for (Shift s: shifts) {
+                result.add(putShift(s));
+            }
+            closeDb();
+            return result;
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
-        closeDb();
-        return result;
     }
 
 
@@ -290,60 +347,75 @@ public class SQLiteAssistant {
      * @param userShifts an array of UserShift objects to be persisited
      * @return an array of longs with all inserted row ids
      */
-    public ArrayList<Long> insertUserShifts(ArrayList<UserShift> userShifts) {
-        ArrayList<Long> result = new ArrayList<>();
-        openDb();
-        db.execSQL(DB_CLEAR_USERSSHIFTS);
-        for (UserShift us : userShifts) {
-            result.add(putUserShift(us));
+    public ArrayList<Long> insertUserShifts(ArrayList<UserShift> userShifts) throws SQLiteException {
+        if (initialized) {
+            ArrayList<Long> result = new ArrayList<>();
+            openDb();
+            db.execSQL(DB_CLEAR_USERSSHIFTS);
+            for (UserShift us : userShifts) {
+                result.add(putUserShift(us));
+            }
+            closeDb();
+            return result;
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
-        closeDb();
-        return result;
     }
 
     /**
      * Insert a whole ORMCache objects container into DB
      * @param cache
      */
-    public void persistOrmCache(OrmCache cache){
-        insertUsers(cache.getUsersList());
-        insertShifts(cache.getShiftsList());
-        insertUserShifts(cache.getUserShiftsList());
+    public void persistOrmCache(ORMCache cache) throws SQLiteException {
+        if (initialized) {
+            Log.d("persistOrmCache", "users: " + cache.getUsersList().size());
+            insertUsers(cache.getUsersList());
+            Log.d("persistOrmCache", "shifts: " + cache.getShiftsList().size());
+            insertShifts(cache.getShiftsList());
+            Log.d("persistOrmCache", "usershifts: " + cache.getUserShiftsList().size());
+            insertUserShifts(cache.getUserShiftsList());
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
     }
 
         /**
          * This method returns a Cursor pointing to all recorded Users in DB
          * @return
          */
-    public ArrayList<User> getAllUsers(){
-        ArrayList<User> result = new ArrayList<>();
-        Cursor dbRows;
-        openDb();
-        dbRows = db.query(DB_USER_TABLE, new String[]{
-                KEY_USER_IDUSER,
-                KEY_USER_USERDNI,
-                KEY_USER_USERNAME,
-                KEY_USER_REALNAME,
-                KEY_USER_PASS,
-                KEY_USER_ADMIN
-        }, null, null, null, null, null);
+    public ArrayList<User> getAllUsers() throws SQLiteException {
+        if (initialized) {
+            ArrayList<User> result = new ArrayList<>();
+            Cursor dbRows;
+            openDb();
+            dbRows = db.query(DB_USER_TABLE, new String[]{
+                    KEY_USER_IDUSER,
+                    KEY_USER_USERDNI,
+                    KEY_USER_USERNAME,
+                    KEY_USER_REALNAME,
+                    KEY_USER_PASS,
+                    KEY_USER_ADMIN
+            }, null, null, null, null, null);
 
-        if (dbRows.moveToFirst()){
-            do {
-                result.add(new User(
-                        dbRows.getInt(0),
-                        dbRows.getInt(5),
-                        dbRows.getString(1),
-                        dbRows.getString(2),
-                        dbRows.getString(3),
-                        dbRows.getString(4)
-                ));
-            } while (dbRows.moveToNext());
-            closeDb();
-            return result;
-        }else {
-            closeDb();
-            return null;
+            if (dbRows.moveToFirst()){
+                do {
+                    result.add(new User(
+                            dbRows.getInt(1),
+                            dbRows.getInt(6),
+                            dbRows.getString(2),
+                            dbRows.getString(3),
+                            dbRows.getString(4),
+                            dbRows.getString(5)
+                    ));
+                } while (dbRows.moveToNext());
+                closeDb();
+                return result;
+            }else {
+                closeDb();
+                return null;
+            }
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
     }
 
@@ -351,33 +423,37 @@ public class SQLiteAssistant {
      * This method returns a Cursor pointing to all recorded Shifts in DB
      * @return
      */
-    public ArrayList<Shift> getAllShifts(){
-        ArrayList<Shift> result = new ArrayList<>();
-        Cursor dbRows;
-        openDb();
-        dbRows = db.query(DB_SHIFT_TABLE, new String[]{
-                KEY_SHIFT_IDSHIFT,
-                KEY_SHIFT_NAME,
-                KEY_SHIFT_STARTTIME,
-                KEY_SHIFT_ENDTIME,
-                KEY_SHIFT_COLOR
-        }, null, null, null, null, null);
+    public ArrayList<Shift> getAllShifts() throws SQLiteException {
+        if (initialized) {
+            ArrayList<Shift> result = new ArrayList<>();
+            Cursor dbRows;
+            openDb();
+            dbRows = db.query(DB_SHIFT_TABLE, new String[]{
+                    KEY_SHIFT_IDSHIFT,
+                    KEY_SHIFT_NAME,
+                    KEY_SHIFT_STARTTIME,
+                    KEY_SHIFT_ENDTIME,
+                    KEY_SHIFT_COLOR
+            }, null, null, null, null, null);
 
-        if (dbRows.moveToFirst()){
-            do {
-                result.add(new Shift(
-                        dbRows.getInt(0),
-                        dbRows.getString(1),
-                        dbRows.getString(2),
-                        dbRows.getString(3),
-                        dbRows.getString(4)
-                ));
-            } while (dbRows.moveToNext());
-            closeDb();
-            return result;
-        }else {
-            closeDb();
-            return null;
+            if (dbRows.moveToFirst()){
+                do {
+                    result.add(new Shift(
+                            dbRows.getInt(1),
+                            dbRows.getString(2),
+                            dbRows.getString(3),
+                            dbRows.getString(4),
+                            dbRows.getString(5)
+                    ));
+                } while (dbRows.moveToNext());
+                closeDb();
+                return result;
+            }else {
+                closeDb();
+                return null;
+            }
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
     }
 
@@ -387,35 +463,39 @@ public class SQLiteAssistant {
      * @param userName
      * @return
      */
-    public ArrayList<User> getUsersByUserName(String userName){
-        ArrayList<User> result = new ArrayList<>();
-        Cursor dbRows;
-        openDb();
-        dbRows = db.query(true, DB_USER_TABLE, new String[] {
-                KEY_USER_IDUSER,
-                KEY_USER_USERDNI,
-                KEY_USER_USERNAME,
-                KEY_USER_REALNAME,
-                KEY_USER_PASS,
-                KEY_USER_ADMIN
-        }, KEY_USER_USERNAME + " = " + userName, null, null, null, null, null);
+    public ArrayList<User> getUsersByUserName(String userName) throws SQLiteException {
+        if (initialized) {
+            ArrayList<User> result = new ArrayList<>();
+            Cursor dbRows;
+            openDb();
+            dbRows = db.query(true, DB_USER_TABLE, new String[] {
+                    KEY_USER_IDUSER,
+                    KEY_USER_USERDNI,
+                    KEY_USER_USERNAME,
+                    KEY_USER_REALNAME,
+                    KEY_USER_PASS,
+                    KEY_USER_ADMIN
+            }, KEY_USER_USERNAME + " = " + userName, null, null, null, null, null);
 
-        if (dbRows.moveToFirst()){
-            do {
-                result.add(new User(
-                        dbRows.getInt(0),
-                        dbRows.getInt(5),
-                        dbRows.getString(1),
-                        dbRows.getString(2),
-                        dbRows.getString(3),
-                        dbRows.getString(4)
-                ));
-            } while (dbRows.moveToNext());
-            closeDb();
-            return result;
+            if (dbRows.moveToFirst()){
+                do {
+                    result.add(new User(
+                            dbRows.getInt(1),
+                            dbRows.getInt(6),
+                            dbRows.getString(2),
+                            dbRows.getString(3),
+                            dbRows.getString(4),
+                            dbRows.getString(5)
+                    ));
+                } while (dbRows.moveToNext());
+                closeDb();
+                return result;
+            } else {
+                closeDb();
+                return null;
+            }
         } else {
-            closeDb();
-            return null;
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
     }
 
@@ -425,33 +505,37 @@ public class SQLiteAssistant {
      * @param idShift
      * @return
      */
-    public ArrayList<Shift> getShiftsById(int idShift){
-        ArrayList<Shift> result = new ArrayList<>();
-        Cursor dbRows;
-        openDb();
-        dbRows = db.query(true, DB_SHIFT_TABLE, new String[] {
-                KEY_SHIFT_IDSHIFT,
-                KEY_SHIFT_NAME,
-                KEY_SHIFT_STARTTIME,
-                KEY_SHIFT_ENDTIME,
-                KEY_SHIFT_COLOR
-        }, KEY_SHIFT_IDSHIFT + " = " + idShift, null, null, null, null, null);
+    public ArrayList<Shift> getShiftsById(int idShift) throws SQLiteException {
+        if (initialized) {
+            ArrayList<Shift> result = new ArrayList<>();
+            Cursor dbRows;
+            openDb();
+            dbRows = db.query(true, DB_SHIFT_TABLE, new String[] {
+                    KEY_SHIFT_IDSHIFT,
+                    KEY_SHIFT_NAME,
+                    KEY_SHIFT_STARTTIME,
+                    KEY_SHIFT_ENDTIME,
+                    KEY_SHIFT_COLOR
+            }, KEY_SHIFT_IDSHIFT + " = " + idShift, null, null, null, null, null);
 
-        if (dbRows.moveToFirst()){
-            do {
-                result.add(new Shift(
-                        dbRows.getInt(0),
-                        dbRows.getString(1),
-                        dbRows.getString(2),
-                        dbRows.getString(3),
-                        dbRows.getString(4)
-                ));
-            } while (dbRows.moveToNext());
-            closeDb();
-            return result;
+            if (dbRows.moveToFirst()){
+                do {
+                    result.add(new Shift(
+                            dbRows.getInt(1),
+                            dbRows.getString(2),
+                            dbRows.getString(3),
+                            dbRows.getString(4),
+                            dbRows.getString(5)
+                    ));
+                } while (dbRows.moveToNext());
+                closeDb();
+                return result;
+            } else {
+                closeDb();
+                return null;
+            }
         } else {
-            closeDb();
-            return null;
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
     }
 

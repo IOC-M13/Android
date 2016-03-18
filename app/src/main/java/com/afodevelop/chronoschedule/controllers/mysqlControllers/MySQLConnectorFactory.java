@@ -2,8 +2,6 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.common.JdbcException;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -51,11 +49,11 @@ public class MySQLConnectorFactory {
      */
     private void establishConnection() throws ClassNotFoundException, SQLException {
         Class.forName("com.mysql.jdbc.Driver");
-        Log.d("establishConnection","URL: " + dbUrl);
-        Log.d("establishConnection","User: " + dbUser);
-        Log.d("establishConnection","Pass: " + dbUserPassword);
+        Log.d("establishConn URL", dbUrl);
+        Log.d("establishConn User", dbUser);
+        Log.d("establishConn Pass", dbUserPassword);
         mySQLConnection = DriverManager.getConnection(dbUrl, dbUser, dbUserPassword);
-
+        Log.d("establishConn conn","" + mySQLConnection.isClosed());
     }
 
     /**
@@ -67,7 +65,8 @@ public class MySQLConnectorFactory {
     public Connection getConnection() throws SQLException, ClassNotFoundException {
 
         if (initialized) {
-            if (mySQLConnection == null) {
+            if (mySQLConnection == null || mySQLConnection.isClosed()) {
+                Log.d("getConnection","is NULL, must reconnect");
                 establishConnection();
             }
             return mySQLConnection;

@@ -23,8 +23,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.common.JdbcException;
-import com.afodevelop.chronoschedule.common.OrmCache;
+import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.controllers.ormControllers.ORMCache;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
@@ -110,6 +111,53 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    public class InitializationTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d("inBackgroud","Iitialize MySQL");
+            initializeMySQL();
+            Log.d("inBackgroud", "Iitialize SQLite");
+            initializeSQLite();
+            Log.d("inBackgroud", "Iitialize checkConn");
+            connectivity = checkConnectivity();
+            Log.d("inBackgroud", "END, returning");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Log.d("PostExecute", "calling logic exec method.");
+            execute();
+        }
+    }
+
+
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    public class ResyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            launchResync();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            renderUI();
+        }
+    }
+
+
     // CLASS-WIDE VARIABLES
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -146,10 +194,9 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             firstExecution = false;
 
-            initializeMySQL();
-            initializeSQLite();
-            connectivity = checkConnectivity();
-            execute();
+            //initialize
+            InitializationTask mySQLInitializationTask = new InitializationTask();
+            mySQLInitializationTask.execute();
         }
     }
 
@@ -165,6 +212,7 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
+
     private void initializeMySQL(){
         Log.d("initializeMySQL", "asked to initialize MySQL");
         try {
@@ -176,16 +224,22 @@ public class LoginActivity extends AppCompatActivity {
             e.printStackTrace();
             printToast("JDBC initialization error");
         }
-    }
+     }
 
-    private void initializeSQLite(){
-        Log.d("initializeSQLite","asked to initialize SQLite");
+
+    private void initializeSQLite() {
+        Log.d("initializeSQLite", "asked to initialize SQLite");
         mySQLiteAssistant = SQLiteAssistant.getInstance();
+        try {
+            mySQLiteAssistant.initialize(getApplicationContext());
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void renderUI(){
+    private void renderUI() {
         // Set up the login form.
-        Log.d("renderUI","Asked to render the UI");
+        Log.d("renderUI", "Asked to render the UI");
         mUsernameView = (EditText) findViewById(R.id.username);
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -216,7 +270,9 @@ public class LoginActivity extends AppCompatActivity {
         // Main logic flow happens here...
         if (firstExecution) {
             if (connectivity) {
-                launchResync();
+                //launch MySQL -> SQLite Resync
+                ResyncTask resyncTask = new ResyncTask();
+                resyncTask.execute();
             } else {
                 printToast("Fatal error: Neither cached data" +
                         " nor database connection available.\n" +
@@ -225,8 +281,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         } else {
             if (connectivity) {
-                launchResync();
-                renderUI();
+                //launch MySQL -> SQLite Resync
+                ResyncTask resyncTask = new ResyncTask();
+                resyncTask.execute();
             }
         }
     }
@@ -395,7 +452,7 @@ public class LoginActivity extends AppCompatActivity {
     private void launchResync() {
         //TODO all this should be done in an Async task?
         Log.d("launchResync", "resync called");
-        OrmCache dataCache = new OrmCache();
+        ORMCache dataCache = new ORMCache();
         try {
             // Read and Cache MySQL data in memory
             dataCache.setShiftsList(mySQLAssistant.getShiftsResultSet());
@@ -410,6 +467,8 @@ public class LoginActivity extends AppCompatActivity {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (JdbcException e) {
+            e.printStackTrace();
+        } catch (SQLiteException e) {
             e.printStackTrace();
         }
 
@@ -447,10 +506,10 @@ public class LoginActivity extends AppCompatActivity {
                 dbPort = extras.getString(SP_KEY_DBPORT);
                 dbHost = extras.getString(SP_KEY_DBHOST);
 
-                initializeMySQL();
-                initializeSQLite();
-                connectivity = checkConnectivity();
-                execute();
+                //initialize
+                InitializationTask mySQLInitializationTask = new InitializationTask();
+                mySQLInitializationTask.execute();
+
             } else {
                 if (firstExecution) {
                     finish();
@@ -471,7 +530,9 @@ public class LoginActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.refresh:
-                launchResync();
+                //launch MySQL -> SQLite Resync
+                ResyncTask resyncTask = new ResyncTask();
+                resyncTask.execute();
                 break;
 
             case R.id.preferences:

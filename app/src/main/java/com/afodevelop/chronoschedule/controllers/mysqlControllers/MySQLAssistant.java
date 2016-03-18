@@ -2,8 +2,7 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.common.JdbcException;
-import com.afodevelop.chronoschedule.common.OrmCache;
+import com.afodevelop.chronoschedule.controllers.ormControllers.ORMCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 
@@ -100,11 +99,11 @@ public class MySQLAssistant {
 
         while (shifts.next()){
             result.add(new Shift(
-                    shifts.getInt(0),
-                    shifts.getString(1),
+                    shifts.getInt(1),
                     shifts.getString(2),
                     shifts.getString(3),
-                    shifts.getString(4)
+                    shifts.getString(4),
+                    shifts.getString(5)
             ));
         }
         closeConnection();
@@ -132,12 +131,12 @@ public class MySQLAssistant {
 
         while (users.next()){
             result.add(new User(
-                    users.getInt(0),
-                    users.getInt(5),
-                    users.getString(1),
+                    users.getInt(1),
+                    users.getInt(6),
                     users.getString(2),
                     users.getString(3),
-                    users.getString(4)
+                    users.getString(4),
+                    users.getString(5)
             ));
         }
         closeConnection();
@@ -158,14 +157,15 @@ public class MySQLAssistant {
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public OrmCache InitializeUserShiftCache(OrmCache cache)
+    public ORMCache InitializeUserShiftCache(ORMCache cache)
             throws SQLException, ClassNotFoundException, JdbcException {
         ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
 
         while (userShifts.next()){
-            cache.addUserShift(userShifts.getInt(0),userShifts.getInt(1),userShifts.getDate(2));
+            cache.addUserShift(userShifts.getInt(1),userShifts.getInt(2),userShifts.getDate(3));
         }
         closeConnection();
+
         return cache;
     }
 
