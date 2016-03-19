@@ -24,8 +24,10 @@ import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
+import com.afodevelop.chronoschedule.controllers.ormControllers.OrmException;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
-import com.afodevelop.chronoschedule.controllers.ormControllers.ORMCache;
+import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
@@ -117,12 +119,28 @@ public class LoginActivity extends AppCompatActivity {
      */
     public class InitializationTask extends AsyncTask<Void, Void, Void> {
 
+        private Exception exceptionToBeThrown;
+
         @Override
         protected Void doInBackground(Void... params) {
             Log.d("inBackgroud","Iitialize MySQL");
-            initializeMySQL();
+            try {
+                initializeMySQL();
+            } catch (JdbcException e) {
+                exceptionToBeThrown = e;
+            }
             Log.d("inBackgroud", "Iitialize SQLite");
-            initializeSQLite();
+            try {
+                initializeSQLite();
+            } catch (SQLiteException e) {
+                exceptionToBeThrown = e;
+            }
+            Log.d("inBackground", "Initialize ORM");
+            try {
+                initializeORM();
+            } catch (OrmException e) {
+                exceptionToBeThrown = e;
+            }
             Log.d("inBackgroud", "Iitialize checkConn");
             connectivity = checkConnectivity();
             Log.d("inBackgroud", "END, returning");
@@ -132,8 +150,12 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.d("PostExecute", "calling logic exec method.");
-            execute();
+            if (exceptionToBeThrown == null) {
+                Log.d("PostExecute", "calling logic exec method.");
+                mainLogic();
+            } else {
+                printToast("Application environment initialization error.");
+            }
         }
     }
 
@@ -144,16 +166,36 @@ public class LoginActivity extends AppCompatActivity {
      */
     public class ResyncTask extends AsyncTask<Void, Void, Void> {
 
+        private Exception exceptionToBeThrown;
+
         @Override
         protected Void doInBackground(Void... params) {
-            launchResync();
+            Log.d("inBackgroud","try to resync Databases.");
+            try {
+                ormAssistant.launchResync();
+            } catch (OrmException e) {
+                exceptionToBeThrown = e;
+            } catch (SQLiteException e) {
+                exceptionToBeThrown = e;
+            } catch (JdbcException e) {
+                exceptionToBeThrown = e;
+            } catch (SQLException e) {
+                exceptionToBeThrown = e;
+            } catch (ClassNotFoundException e) {
+                exceptionToBeThrown = e;
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            renderUI();
+            if (exceptionToBeThrown == null) {
+                Log.d("PostExecute", "rendering UI.");
+                renderUI();
+            } else {
+                printToast("Database sync error.");
+            }
         }
     }
 
@@ -163,16 +205,20 @@ public class LoginActivity extends AppCompatActivity {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private boolean connectivity, firstExecution;
+    private boolean uiRendered = false;
     private String dbHost, dbPort;
     MySQLConnectorFactory mySQLConnectorFactory;
     MySQLAssistant mySQLAssistant;
-    SQLiteAssistant mySQLiteAssistant;
+    SQLiteAssistant sqLiteAssistant;
+    ORMAssistant ormAssistant;
     private UserLoginTask mAuthTask = null;
 
+    private Menu appMenu;
     private EditText mUsernameView;
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private Button mUsernameSignInButton;
 
 
     // LOGIC
@@ -201,7 +247,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Here we got a reference to the action bar menu and its Items
      * @param menu
      * @return
      */
@@ -209,64 +255,81 @@ public class LoginActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.login_menu, menu);
+        appMenu = menu;
         return true;
     }
 
 
-    private void initializeMySQL(){
+    private void initializeMySQL() throws JdbcException {
         Log.d("initializeMySQL", "asked to initialize MySQL");
-        try {
-            mySQLConnectorFactory = new MySQLConnectorFactory(
-                    dbHost, dbPort, "dbChronoSchedule", "standard", "1234");
-            mySQLAssistant = MySQLAssistant.getInstance();
-            mySQLAssistant.initialize(mySQLConnectorFactory);
-        } catch (JdbcException e) {
-            e.printStackTrace();
-            printToast("JDBC initialization error");
-        }
+        mySQLConnectorFactory = new MySQLConnectorFactory(
+                dbHost, dbPort, "dbChronoSchedule", "standard", "1234");
+        mySQLAssistant = MySQLAssistant.getInstance();
+        mySQLAssistant.initialize(mySQLConnectorFactory);
+
      }
 
 
-    private void initializeSQLite() {
+    private void initializeSQLite() throws SQLiteException {
         Log.d("initializeSQLite", "asked to initialize SQLite");
-        mySQLiteAssistant = SQLiteAssistant.getInstance();
-        try {
-            mySQLiteAssistant.initialize(getApplicationContext());
-        } catch (SQLiteException e) {
-            e.printStackTrace();
+        sqLiteAssistant = SQLiteAssistant.getInstance();
+        sqLiteAssistant.initialize(getApplicationContext());
+    }
+
+    private void initializeORM() throws OrmException {
+        Log.d("InitializeORM","asked to initialize ORM");
+        if (mySQLAssistant != null && sqLiteAssistant != null) {
+            ormAssistant = ORMAssistant.getInstance();
+            ormAssistant.initialize(mySQLAssistant, sqLiteAssistant);
+        } else {
+            Log.d("InitializeORM","asking to initialize with null parameters");
+            throw new OrmException("Cannot be initialized with null MySQL or SQLite Assistants.");
         }
     }
 
     private void renderUI() {
         // Set up the login form.
         Log.d("renderUI", "Asked to render the UI");
-        mUsernameView = (EditText) findViewById(R.id.username);
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
+        if (!uiRendered) {
+            mUsernameView = (EditText) findViewById(R.id.username);
+            mPasswordView = (EditText) findViewById(R.id.password);
+            mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                    if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                        attemptLogin();
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
 
-        Button mUsernameSignInButton = (Button) findViewById(R.id.sign_in_button);
-        mUsernameSignInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
+            mUsernameSignInButton = (Button) findViewById(R.id.sign_in_button);
+            mUsernameSignInButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    attemptLogin();
+                }
+            });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+            mLoginFormView = findViewById(R.id.login_form);
+            mProgressView = findViewById(R.id.login_progress);
+            uiRendered = true;
+        }
+
+        if (!connectivity){
+            appMenu.findItem(R.id.login_refresh_menuitem).setIcon(R.drawable.stat_notify_sync_error);
+            appMenu.findItem(R.id.login_refresh_menuitem).setEnabled(false);
+            invalidateOptionsMenu();
+        } else {
+            appMenu.findItem(R.id.login_refresh_menuitem).setIcon(R.drawable.stat_notify_sync_anim0);
+            appMenu.findItem(R.id.login_refresh_menuitem).setEnabled(true);
+            invalidateOptionsMenu();
+        }
     }
 
-    private void execute(){
-        Log.d("execute","firstexecution: " + firstExecution + ", connectivity: " + connectivity);
+    private void mainLogic(){
+        Log.d("execute", "firstexecution: " + firstExecution + ", connectivity: " + connectivity);
         // Main logic flow happens here...
         if (firstExecution) {
             if (connectivity) {
@@ -447,34 +510,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * This method triggers MySQL -> SQLite sync
-     */
-    private void launchResync() {
-        //TODO all this should be done in an Async task?
-        Log.d("launchResync", "resync called");
-        ORMCache dataCache = new ORMCache();
-        try {
-            // Read and Cache MySQL data in memory
-            dataCache.setShiftsList(mySQLAssistant.getShiftsResultSet());
-            dataCache.setUsersList(mySQLAssistant.getUserResultSet());
-            dataCache = mySQLAssistant.InitializeUserShiftCache(dataCache);
-
-            //Dump cached data into SQLite
-            mySQLiteAssistant.persistOrmCache(dataCache);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (JdbcException e) {
-            e.printStackTrace();
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
      * This method launches the settings activity passing it the
      * current connection data.
      */
@@ -518,8 +553,6 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
-
     /**
      * Handle ActionBar Items press
      * @param item
@@ -529,13 +562,13 @@ public class LoginActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.refresh:
+            case R.id.login_refresh_menuitem:
                 //launch MySQL -> SQLite Resync
                 ResyncTask resyncTask = new ResyncTask();
                 resyncTask.execute();
                 break;
 
-            case R.id.preferences:
+            case R.id.login_preferences_menuitem:
                 launchSettings();
                 break;
         }

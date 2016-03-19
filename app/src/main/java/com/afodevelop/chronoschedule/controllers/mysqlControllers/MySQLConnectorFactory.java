@@ -32,7 +32,7 @@ public class MySQLConnectorFactory {
             this.dbUserPassword = pass;
             this.dbUrl = "jdbc:mysql://" + dbHost + ":" + dbPort + "/" + dbName;
             this.initialized = true;
-            Log.d("JDBC", "URL: " + dbUrl);
+            Log.d("JDBC", "Initialized for: " + dbUrl);
         } else {
             Log.e("JDBC", "null argument provided for jdbc url assembling");
             throw new JdbcException ("While assembling MySQL connection jdbc url:" +
@@ -53,7 +53,7 @@ public class MySQLConnectorFactory {
         Log.d("establishConn User", dbUser);
         Log.d("establishConn Pass", dbUserPassword);
         mySQLConnection = DriverManager.getConnection(dbUrl, dbUser, dbUserPassword);
-        Log.d("establishConn conn","" + mySQLConnection.isClosed());
+        Log.d("establishConn stat","is closed = " + mySQLConnection.isClosed());
     }
 
     /**

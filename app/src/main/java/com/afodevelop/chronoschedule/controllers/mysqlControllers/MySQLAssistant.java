@@ -2,7 +2,7 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.controllers.ormControllers.ORMCache;
+import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 
@@ -19,13 +19,14 @@ public class MySQLAssistant {
 
 
     //CONSTANTS
+    private static MySQLAssistant ourInstance = null;
+
     private static final String USERS_SELECT = "SELECT * FROM Users";
     private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
     private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
 
     //CLASSWIDE VARIABLES
-    private static MySQLAssistant ourInstance = null;
-    private boolean initialized;
+    private boolean initialized = false;
     private Connection mySQLConnection;
     private MySQLConnectorFactory mySQLConnectorFactory;
 
@@ -51,9 +52,17 @@ public class MySQLAssistant {
      * This method initializes the MySQLAssistant with a MySQLConnectionFactory
      * @param factory a pre-configured MySQLConnectorFactory
      */
-    public void initialize(MySQLConnectorFactory factory){
-        initialized = true;
-        this.mySQLConnectorFactory = factory;
+    public void initialize(MySQLConnectorFactory factory) throws JdbcException {
+        if (factory != null) {
+            if (mySQLConnectorFactory == null) {
+                initialized = true;
+                mySQLConnectorFactory = factory;
+            } else {
+                throw new JdbcException("MySQLConnectorFactory already initialized on MySQLAssistant");
+            }
+        } else {
+            throw new JdbcException("Cannot be initialized with a null MySQLConnectorFactory");
+        }
     }
 
     /**

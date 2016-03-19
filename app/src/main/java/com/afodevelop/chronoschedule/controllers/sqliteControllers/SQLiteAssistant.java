@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.controllers.ormControllers.ORMCache;
+import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 import com.afodevelop.chronoschedule.model.UserShift;
@@ -20,6 +20,8 @@ import java.util.ArrayList;
 public class SQLiteAssistant {
 
     //CONSTANTS
+    private static SQLiteAssistant ourInstance = null;
+
     protected static final int VERSION = 1;
     protected static final String TAG = "SQLConnection";
     protected static final String DB_NAME = "BDChronoSchedule";
@@ -129,11 +131,10 @@ public class SQLiteAssistant {
     } // <- END OF INNER CLASS!!!
 
     // CLASS-WIDE VARIABLES
-    private static SQLiteAssistant ourInstance = null;
     private SQLiteHelper sQLiteHelper;
     private SQLiteDatabase db;
     private Context context;
-    private boolean initialized;
+    private boolean initialized = false;
 
     // CONSTRUCTOR
     /**
@@ -149,13 +150,17 @@ public class SQLiteAssistant {
      */
     public void initialize(Context c) throws SQLiteException {
         // We set the context
-        if (context == null){
-            context = c;
-            //we instantiate the SqliteHelper
-            sQLiteHelper = new SQLiteHelper(context);
-            initialized = true;
+        if (c != null){
+            if (context == null) {
+                context = c;
+                //we instantiate the SqliteHelper
+                sQLiteHelper = new SQLiteHelper(context);
+                initialized = true;
+            } else {
+                throw new SQLiteException("Context already initialized on RSSFeedAssistant");
+            }
         } else {
-            throw new SQLiteException("Context already initialized on RSSFeedAssistant");
+            throw new SQLiteException("Cannot be initialized with Null Context.");
         }
     }
 
@@ -368,12 +373,16 @@ public class SQLiteAssistant {
      */
     public void persistOrmCache(ORMCache cache) throws SQLiteException {
         if (initialized) {
-            Log.d("persistOrmCache", "users: " + cache.getUsersList().size());
-            insertUsers(cache.getUsersList());
-            Log.d("persistOrmCache", "shifts: " + cache.getShiftsList().size());
-            insertShifts(cache.getShiftsList());
-            Log.d("persistOrmCache", "usershifts: " + cache.getUserShiftsList().size());
-            insertUserShifts(cache.getUserShiftsList());
+            if (cache != null) {
+                Log.d("persistOrmCache", "users: " + cache.getUsersList().size());
+                insertUsers(cache.getUsersList());
+                Log.d("persistOrmCache", "shifts: " + cache.getShiftsList().size());
+                insertShifts(cache.getShiftsList());
+                Log.d("persistOrmCache", "usershifts: " + cache.getUserShiftsList().size());
+                insertUserShifts(cache.getUserShiftsList());
+            } else {
+                throw new SQLiteException("While persisting ORM cache: Null object was provided!");
+            }
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
