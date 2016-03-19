@@ -3,7 +3,13 @@ package com.afodevelop.chronoschedule.controllers.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -31,8 +37,10 @@ import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
+import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  * A login screen that offers login via username/password.
@@ -55,60 +63,31 @@ public class LoginActivity extends AppCompatActivity {
     };
 
     // INTERNAL CLASS DEFINITIONS
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
-        private final String mUsername;
-        private final String mPassword;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            CheckConnectivityTask checkConnectivity = new CheckConnectivityTask();
+            checkConnectivity.execute();
+            Log.d("onReceive", "Updating conectivity!");
+        }
+    }
 
-        UserLoginTask(String username, String password) {
-            mUsername = username;
-            mPassword = password;
+
+    private class CheckConnectivityTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Log.d("inBackgroud", "call checkConnectivity");
+            connectivity = checkConnectivity();
+            Log.d("inBackgroud", "END, returning");
+            return null;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mUsername)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                signIn(mUsername);
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            renderUI();
         }
     }
 
@@ -117,9 +96,19 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class InitializationTask extends AsyncTask<Void, Void, Void> {
+    private class InitializationTask extends AsyncTask<Void, Void, Void> {
 
         private Exception exceptionToBeThrown;
+        private ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute(){
+            progressDialog = new ProgressDialog(LoginActivity.this);
+            progressDialog.setIndeterminate(false);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setMessage("Setting up environment... please wait.");
+            progressDialog.show();
+        }
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -141,7 +130,9 @@ public class LoginActivity extends AppCompatActivity {
             } catch (OrmException e) {
                 exceptionToBeThrown = e;
             }
-            Log.d("inBackgroud", "Iitialize checkConn");
+            Log.d("inBackground", "Initialize JDBC Connectivity Watch Dog");
+            initializeConnectivityWatchDog();
+            Log.d("inBackgroud", "call checkConnectivity");
             connectivity = checkConnectivity();
             Log.d("inBackgroud", "END, returning");
             return null;
@@ -150,6 +141,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            progressDialog.dismiss();
             if (exceptionToBeThrown == null) {
                 Log.d("PostExecute", "calling logic exec method.");
                 mainLogic();
@@ -164,14 +156,25 @@ public class LoginActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class ResyncTask extends AsyncTask<Void, Void, Void> {
+    private class ResyncTask extends AsyncTask<Void, Void, Void> {
 
         private Exception exceptionToBeThrown;
+        private ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute(){
+            progressDialog = new ProgressDialog(LoginActivity.this);
+            progressDialog.setIndeterminate(false);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.setMessage("Updating local database... please wait.");
+            progressDialog.show();
+        }
 
         @Override
         protected Void doInBackground(Void... params) {
             Log.d("inBackgroud","try to resync Databases.");
             try {
+                Thread.sleep(2000);
                 ormAssistant.launchResync();
             } catch (OrmException e) {
                 exceptionToBeThrown = e;
@@ -183,6 +186,8 @@ public class LoginActivity extends AppCompatActivity {
                 exceptionToBeThrown = e;
             } catch (ClassNotFoundException e) {
                 exceptionToBeThrown = e;
+            } catch (InterruptedException e) {
+                exceptionToBeThrown = e;
             }
             return null;
         }
@@ -190,6 +195,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            progressDialog.dismiss();
             if (exceptionToBeThrown == null) {
                 Log.d("PostExecute", "rendering UI.");
                 renderUI();
@@ -207,11 +213,13 @@ public class LoginActivity extends AppCompatActivity {
     private boolean connectivity, firstExecution;
     private boolean uiRendered = false;
     private String dbHost, dbPort;
-    MySQLConnectorFactory mySQLConnectorFactory;
-    MySQLAssistant mySQLAssistant;
-    SQLiteAssistant sqLiteAssistant;
-    ORMAssistant ormAssistant;
-    private UserLoginTask mAuthTask = null;
+    private MySQLConnectorFactory mySQLConnectorFactory;
+    private MySQLAssistant mySQLAssistant;
+    private SQLiteAssistant sqLiteAssistant;
+    private ORMAssistant ormAssistant;
+    private AlarmManager alarmManager;
+    private PendingIntent alarmPendingIntent;
+    private JdbcStatusUpdateReceiver jdbcStatusUpdateReceiver;
 
     private Menu appMenu;
     private EditText mUsernameView;
@@ -227,6 +235,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Log.d("onCreate","APP STARTS HERE!!!!");
 
         // Initialize the shared preferences
         SharedPreferences lastState = getSharedPreferences(SP_NAME, MODE_PRIVATE);
@@ -235,9 +244,11 @@ public class LoginActivity extends AppCompatActivity {
 
         // Check Shared Preferences
         if (dbHost.equalsIgnoreCase("")) {
+            Log.d("onCreate","first execution = true");
             firstExecution = true;
             launchSettings();
         } else {
+            Log.d("onCreate","first execution = false");
             firstExecution = false;
 
             //initialize
@@ -256,41 +267,79 @@ public class LoginActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.login_menu, menu);
         appMenu = menu;
+
+        if (uiRendered) {
+            if (!connectivity) {
+                Log.d("renderUI", "Rerendering to OFF-LINE mode menu");
+                appMenu.findItem(R.id.login_refresh_menuitem).setIcon(R.drawable.stat_notify_sync_error);
+                appMenu.findItem(R.id.login_refresh_menuitem).setEnabled(false);
+            } else {
+                Log.d("renderUI", "Rerendering to ON-LINE mode menu");
+                appMenu.findItem(R.id.login_refresh_menuitem).setIcon(R.drawable.stat_notify_sync_anim0);
+                appMenu.findItem(R.id.login_refresh_menuitem).setEnabled(true);
+            }
+        }
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        InitializationTask mySQLInitializationTask = new InitializationTask();
+        mySQLInitializationTask.execute();
+    }
 
     private void initializeMySQL() throws JdbcException {
         Log.d("initializeMySQL", "asked to initialize MySQL");
         mySQLConnectorFactory = new MySQLConnectorFactory(
                 dbHost, dbPort, "dbChronoSchedule", "standard", "1234");
         mySQLAssistant = MySQLAssistant.getInstance();
-        mySQLAssistant.initialize(mySQLConnectorFactory);
-
+        if (!mySQLAssistant.isInitialized()) {
+            mySQLAssistant.initialize(mySQLConnectorFactory);
+        }
      }
 
 
     private void initializeSQLite() throws SQLiteException {
         Log.d("initializeSQLite", "asked to initialize SQLite");
         sqLiteAssistant = SQLiteAssistant.getInstance();
-        sqLiteAssistant.initialize(getApplicationContext());
+        if (!sqLiteAssistant.isInitialized()) {
+            sqLiteAssistant.initialize(getApplicationContext());
+        }
     }
 
     private void initializeORM() throws OrmException {
-        Log.d("InitializeORM","asked to initialize ORM");
+        Log.d("InitializeORM", "asked to initialize ORM");
         if (mySQLAssistant != null && sqLiteAssistant != null) {
             ormAssistant = ORMAssistant.getInstance();
-            ormAssistant.initialize(mySQLAssistant, sqLiteAssistant);
+            if (!ormAssistant.isInitialized()) {
+                ormAssistant.initialize(mySQLAssistant, sqLiteAssistant);
+            }
         } else {
-            Log.d("InitializeORM","asking to initialize with null parameters");
+            Log.d("InitializeORM", "asking to initialize with null parameters");
             throw new OrmException("Cannot be initialized with null MySQL or SQLite Assistants.");
         }
+    }
+
+    private void initializeConnectivityWatchDog(){
+        Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
+        alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        long now = System.currentTimeMillis();
+        long interval = 1 * 60 * 1000; // 1 hour
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
+                alarmPendingIntent);
+
+        IntentFilter filter = new IntentFilter("com.afodevelop.chronoschedule.MY_TIMER");
+        jdbcStatusUpdateReceiver = new JdbcStatusUpdateReceiver();
+        registerReceiver(jdbcStatusUpdateReceiver, filter);
     }
 
     private void renderUI() {
         // Set up the login form.
         Log.d("renderUI", "Asked to render the UI");
         if (!uiRendered) {
+            Log.d("renderUI", "UI already rendered, Skipping Views re-render.");
             mUsernameView = (EditText) findViewById(R.id.username);
             mPasswordView = (EditText) findViewById(R.id.password);
             mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -317,15 +366,8 @@ public class LoginActivity extends AppCompatActivity {
             uiRendered = true;
         }
 
-        if (!connectivity){
-            appMenu.findItem(R.id.login_refresh_menuitem).setIcon(R.drawable.stat_notify_sync_error);
-            appMenu.findItem(R.id.login_refresh_menuitem).setEnabled(false);
-            invalidateOptionsMenu();
-        } else {
-            appMenu.findItem(R.id.login_refresh_menuitem).setIcon(R.drawable.stat_notify_sync_anim0);
-            appMenu.findItem(R.id.login_refresh_menuitem).setEnabled(true);
-            invalidateOptionsMenu();
-        }
+        Log.d("renderUI", "Asking to re-render the Menu");
+        invalidateOptionsMenu();
     }
 
     private void mainLogic(){
@@ -390,35 +432,27 @@ public class LoginActivity extends AppCompatActivity {
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mUsernameView.getText().toString();
+        String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
+        // Check for a valid username.
+        if (TextUtils.isEmpty(username)) {
             mUsernameView.setError(getString(R.string.error_field_required));
-            focusView = mUsernameView;
-            cancel = true;
-        } else if (!isUsernameValid(email)) {
-            mUsernameView.setError(getString(R.string.error_invalid_username));
             focusView = mUsernameView;
             cancel = true;
         }
@@ -428,83 +462,29 @@ public class LoginActivity extends AppCompatActivity {
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            // Perform login attempt.
+            try {
+                User candidate = sqLiteAssistant.getUserByUserName(username);
+                if (candidate.getPass().contentEquals(password)){
+                    signIn(candidate);
+                } else {
+                    printToast("Wrong username or password.");
+                }
+            } catch (SQLiteException e) {
+                printToast("Error: Unable to access users list.");
+            }
         }
     }
 
     /**
-     *
-     * @param username
-     * @return
-     */
-    private boolean isUsernameValid(String username) {
-        //TODO: Replace this with your own logic
-        return true;
-    }
-
-    /**
-     *
-     * @param password
-     * @return
-     */
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
-    }
-
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-    /**
-     *
+     * This method is responsible of gracefully pass all assistant and artifacts to the
+     * main activity
      * @param user
      */
-    private void signIn(String user) {
+    private void signIn(User user) {
         Bundle extras = new Bundle();
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
-        extras.putString("user", user);
-        if (user.equals("admin")){
-            extras.putBoolean("isAdmin", true);
-        } else {
-            extras.putBoolean("isAdmin", false);
-        }
+        extras.putString("user", user.getUserName());
         i.putExtras(extras);
         startActivity(i);
     }
@@ -520,7 +500,7 @@ public class LoginActivity extends AppCompatActivity {
         extras.putString(SP_KEY_DBHOST, dbHost);
         extras.putString(SP_KEY_DBPORT, dbPort);
         i.putExtras(extras);
-        startActivityForResult(i,APP_CALL_ID);
+        startActivityForResult(i, APP_CALL_ID);
     }
 
     /**
@@ -573,6 +553,17 @@ public class LoginActivity extends AppCompatActivity {
                 break;
         }
         return true;
+    }
+
+    /**
+     * Save las state using Android native SharedPreferences persistence
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        storePreferences(dbHost, dbPort);
+        unregisterReceiver(jdbcStatusUpdateReceiver);
+        alarmManager.cancel(alarmPendingIntent);
     }
 
     /**

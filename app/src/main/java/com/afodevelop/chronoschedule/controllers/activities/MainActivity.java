@@ -9,20 +9,49 @@ import android.view.MenuItem;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.adapters.PagerAdapter;
+import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
+import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
+import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
+import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
+import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.User;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    // CONSTANTS
+
+    // CLASS-WIDE VARIABLES
+    private MySQLAssistant mySQLAssistant;
+    private SQLiteAssistant sqLiteAssistant;
+    private ORMAssistant ormAssistant;
+
     private boolean isAdmin;
-    private String userName;
+    private User user;
+
+    // INTERNAL CLASS DEFINITIONS
+
+
+
+    // LOGIC
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
-        userName = getIntent().getExtras().getString("user");
+        mySQLAssistant = MySQLAssistant.getInstance();
+        sqLiteAssistant = SQLiteAssistant.getInstance();
+        ormAssistant = ORMAssistant.getInstance();
+
+        try {
+            user = sqLiteAssistant.getUserByUserName(getIntent().getExtras().getString("user"));
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+        }
+
+        isAdmin = user.isAdmin();
+
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         TabLayout.Tab tmpTab;

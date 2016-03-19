@@ -409,12 +409,12 @@ public class SQLiteAssistant {
             if (dbRows.moveToFirst()){
                 do {
                     result.add(new User(
-                            dbRows.getInt(1),
-                            dbRows.getInt(6),
+                            dbRows.getInt(0),
+                            dbRows.getInt(5),
+                            dbRows.getString(1),
                             dbRows.getString(2),
                             dbRows.getString(3),
-                            dbRows.getString(4),
-                            dbRows.getString(5)
+                            dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
                 closeDb();
@@ -448,11 +448,11 @@ public class SQLiteAssistant {
             if (dbRows.moveToFirst()){
                 do {
                     result.add(new Shift(
-                            dbRows.getInt(1),
+                            dbRows.getInt(0),
+                            dbRows.getString(1),
                             dbRows.getString(2),
                             dbRows.getString(3),
-                            dbRows.getString(4),
-                            dbRows.getString(5)
+                            dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
                 closeDb();
@@ -472,9 +472,10 @@ public class SQLiteAssistant {
      * @param userName
      * @return
      */
-    public ArrayList<User> getUsersByUserName(String userName) throws SQLiteException {
+    public User getUserByUserName(String userName) throws SQLiteException {
         if (initialized) {
-            ArrayList<User> result = new ArrayList<>();
+            ArrayList<User> candidates = new ArrayList<>();
+            User result;
             Cursor dbRows;
             openDb();
             dbRows = db.query(true, DB_USER_TABLE, new String[] {
@@ -483,22 +484,25 @@ public class SQLiteAssistant {
                     KEY_USER_USERNAME,
                     KEY_USER_REALNAME,
                     KEY_USER_PASS,
-                    KEY_USER_ADMIN
-            }, KEY_USER_USERNAME + " = " + userName, null, null, null, null, null);
+                    KEY_USER_ADMIN }, KEY_USER_USERNAME + " = '" + userName +"'", null, null, null, null, null);
 
             if (dbRows.moveToFirst()){
                 do {
-                    result.add(new User(
-                            dbRows.getInt(1),
-                            dbRows.getInt(6),
+                    candidates.add(new User(
+                            dbRows.getInt(0),
+                            dbRows.getInt(5),
+                            dbRows.getString(1),
                             dbRows.getString(2),
                             dbRows.getString(3),
-                            dbRows.getString(4),
-                            dbRows.getString(5)
+                            dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
                 closeDb();
-                return result;
+                if (!candidates.isEmpty()) {
+                    return candidates.get(0);
+                } else {
+                    return null;
+                }
             } else {
                 closeDb();
                 return null;
@@ -514,9 +518,10 @@ public class SQLiteAssistant {
      * @param idShift
      * @return
      */
-    public ArrayList<Shift> getShiftsById(int idShift) throws SQLiteException {
+    public Shift getShiftById(int idShift) throws SQLiteException {
         if (initialized) {
-            ArrayList<Shift> result = new ArrayList<>();
+            ArrayList<Shift> candidates = new ArrayList<>();
+            Shift result;
             Cursor dbRows;
             openDb();
             dbRows = db.query(true, DB_SHIFT_TABLE, new String[] {
@@ -529,16 +534,20 @@ public class SQLiteAssistant {
 
             if (dbRows.moveToFirst()){
                 do {
-                    result.add(new Shift(
-                            dbRows.getInt(1),
+                    candidates.add(new Shift(
+                            dbRows.getInt(0),
+                            dbRows.getString(1),
                             dbRows.getString(2),
                             dbRows.getString(3),
-                            dbRows.getString(4),
-                            dbRows.getString(5)
+                            dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
                 closeDb();
-                return result;
+                if (!candidates.isEmpty()) {
+                    return candidates.get(0);
+                } else {
+                    return null;
+                }
             } else {
                 closeDb();
                 return null;
@@ -546,6 +555,10 @@ public class SQLiteAssistant {
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
+    }
+
+    public boolean isInitialized(){
+        return initialized;
     }
 
 }

@@ -102,28 +102,31 @@ public class MySQLAssistant {
      */
     public ArrayList<Shift> getShiftsResultSet() throws SQLException, ClassNotFoundException,
             JdbcException {
+        if (initialized) {
+            ResultSet shifts = queryDatabase(SHIFTS_SELECT);
+            ArrayList<Shift> result = new ArrayList<>();
 
-        ResultSet shifts = queryDatabase(SHIFTS_SELECT);
-        ArrayList<Shift> result = new ArrayList<>();
+            while (shifts.next()) {
+                result.add(new Shift(
+                        shifts.getInt(1),
+                        shifts.getString(2),
+                        shifts.getString(3),
+                        shifts.getString(4),
+                        shifts.getString(5)
+                ));
+            }
+            closeConnection();
 
-        while (shifts.next()){
-            result.add(new Shift(
-                    shifts.getInt(1),
-                    shifts.getString(2),
-                    shifts.getString(3),
-                    shifts.getString(4),
-                    shifts.getString(5)
-            ));
-        }
-        closeConnection();
-
-        int size = result.size();
-        if (size > 0){
-            Log.d("JDBC", size + "Shift entries retrieved from database ");
-            return result;
+            int size = result.size();
+            if (size > 0) {
+                Log.d("JDBC", size + "Shift entries retrieved from database ");
+                return result;
+            } else {
+                Log.d("JDBC", "No Shift entries could be retrieved from database ");
+                return null;
+            }
         } else {
-            Log.d("JDBC","No Shift entries could be retrieved from database ");
-            return null;
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
     }
 
@@ -134,29 +137,32 @@ public class MySQLAssistant {
      * @throws ClassNotFoundException
      */
     public ArrayList<User> getUserResultSet() throws SQLException, ClassNotFoundException, JdbcException {
+        if (initialized) {
+            ResultSet users = queryDatabase(USERS_SELECT);
+            ArrayList<User> result = new ArrayList<>();
 
-        ResultSet users = queryDatabase(USERS_SELECT);
-        ArrayList<User> result = new ArrayList<>();
+            while (users.next()) {
+                result.add(new User(
+                        users.getInt(1),
+                        users.getInt(6),
+                        users.getString(2),
+                        users.getString(3),
+                        users.getString(4),
+                        users.getString(5)
+                ));
+            }
+            closeConnection();
 
-        while (users.next()){
-            result.add(new User(
-                    users.getInt(1),
-                    users.getInt(6),
-                    users.getString(2),
-                    users.getString(3),
-                    users.getString(4),
-                    users.getString(5)
-            ));
-        }
-        closeConnection();
-
-        int size = result.size();
-        if (size > 0){
-            Log.d("JDBC", size + "User entries retrieved from database ");
-            return result;
+            int size = result.size();
+            if (size > 0) {
+                Log.d("JDBC", size + "User entries retrieved from database ");
+                return result;
+            } else {
+                Log.d("JDBC", "No User entries could be retrieved from database ");
+                return null;
+            }
         } else {
-            Log.d("JDBC","No User entries could be retrieved from database ");
-            return null;
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
     }
 
@@ -168,14 +174,18 @@ public class MySQLAssistant {
      */
     public ORMCache InitializeUserShiftCache(ORMCache cache)
             throws SQLException, ClassNotFoundException, JdbcException {
-        ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
+        if (initialized){
+            ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
 
-        while (userShifts.next()){
-            cache.addUserShift(userShifts.getInt(1),userShifts.getInt(2),userShifts.getDate(3));
+            while (userShifts.next()){
+                cache.addUserShift(userShifts.getInt(1),userShifts.getInt(2),userShifts.getDate(3));
+            }
+            closeConnection();
+
+            return cache;
+        } else {
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
-        closeConnection();
-
-        return cache;
     }
 
     /**
@@ -183,18 +193,24 @@ public class MySQLAssistant {
      * @return
      */
     public boolean checkConnectivity() throws JdbcException {
-        try {
-            openConnection();
-            closeConnection();
-            return true;
-        } catch (SQLException e) {
-            Log.w("JDBC","While checking MySQL connectivity: caught SQLException");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            Log.w("JDBC","While checking MySQL connectivity: caught ClassNotFoundException");
-            e.printStackTrace();
+        if (initialized) {
+            try {
+                openConnection();
+                closeConnection();
+                Log.d("JDBC","Check connectivity success! returning true.");
+                return true;
+            } catch (SQLException e) {
+                Log.w("JDBC", "While checking MySQL connectivity: caught SQLException");
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                Log.w("JDBC", "While checking MySQL connectivity: caught ClassNotFoundException");
+                e.printStackTrace();
+            }
+            Log.d("JDBC","Check connectivity failure! returning false.");
+            return false;
+        } else {
+            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
-        return false;
     }
 
     /**

@@ -22,6 +22,11 @@ public class User {
         this.pass = pass;
     }
 
+    // LOGIC
+    public boolean isAdmin(){
+        return (admin == 1);
+    }
+
     //SETTERS AND GETTERS
 
     public int getIdUser() {
