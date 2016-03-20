@@ -54,15 +54,14 @@ public class LoginActivity extends AppCompatActivity {
     private static final String SP_KEY_DBHOST = "dbHost";
     private static final String SP_KEY_DBPORT = "dbPort";
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "alex:123456", "oscar:678910", "admin:123456"
-    };
 
     // INTERNAL CLASS DEFINITIONS
+
+    /**
+     * This class is a broadcast reciver. It handles what happens as our
+     * activity receives periodically an alarm event: It will trigger a
+     * connectivity check!
+     */
     private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
         @Override
@@ -73,7 +72,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-
+    /**
+     * This class is an AsyncTask based task that performs a connectivity check.
+     */
     private class CheckConnectivityTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -153,8 +154,8 @@ public class LoginActivity extends AppCompatActivity {
 
 
     /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
+     * This tasks perform a background process of syncing remote mysql database
+     * with local, off-line possible, native, sqlite db.
      */
     private class ResyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -174,7 +175,7 @@ public class LoginActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
             Log.d("inBackgroud","try to resync Databases.");
             try {
-                Thread.sleep(2000);
+                Thread.sleep(100);
                 ormAssistant.launchResync();
             } catch (OrmException e) {
                 exceptionToBeThrown = e;
@@ -412,7 +413,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * This method actually asks out MySQL JDBC assistant to check for
+     * available connectivity.
      * @return
      */
     private boolean checkConnectivity(){

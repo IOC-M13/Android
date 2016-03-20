@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".controllers.activities.LoginActivity">
 
-    <item android:id="@+id/refresh"
+    <item android:id="@+id/main_refresh_menuitem"
         android:title="Resync"
         android:icon="@drawable/stat_notify_sync_anim0"
         android:orderInCategory="100"

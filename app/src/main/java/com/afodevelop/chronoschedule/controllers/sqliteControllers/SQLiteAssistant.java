@@ -12,7 +12,11 @@ import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 import com.afodevelop.chronoschedule.model.UserShift;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by alex on 15/03/16.
@@ -515,6 +519,52 @@ public class SQLiteAssistant {
     /**
      * This method returns a cursor with the rows containing certain items by key field.
      * Theoretically, just a single row in resulting cursor should be present...
+     * @param idUser User id as integer
+     * @return
+     */
+    public User getUserById(int idUser) throws SQLiteException {
+        if (initialized) {
+            ArrayList<User> candidates = new ArrayList<>();
+            User result;
+            Cursor dbRows;
+            openDb();
+            dbRows = db.query(true, DB_USER_TABLE, new String[] {
+                    KEY_USER_IDUSER,
+                    KEY_USER_USERDNI,
+                    KEY_USER_USERNAME,
+                    KEY_USER_REALNAME,
+                    KEY_USER_PASS,
+                    KEY_USER_ADMIN }, KEY_USER_IDUSER + " = " + idUser, null, null, null, null, null);
+
+            if (dbRows.moveToFirst()){
+                do {
+                    candidates.add(new User(
+                            dbRows.getInt(0),
+                            dbRows.getInt(5),
+                            dbRows.getString(1),
+                            dbRows.getString(2),
+                            dbRows.getString(3),
+                            dbRows.getString(4)
+                    ));
+                } while (dbRows.moveToNext());
+                closeDb();
+                if (!candidates.isEmpty()) {
+                    return candidates.get(0);
+                } else {
+                    return null;
+                }
+            } else {
+                closeDb();
+                return null;
+            }
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
+    }
+
+    /**
+     * This method returns a cursor with the rows containing certain items by key field.
+     * Theoretically, just a single row in resulting cursor should be present...
      * @param idShift
      * @return
      */
@@ -540,6 +590,45 @@ public class SQLiteAssistant {
                             dbRows.getString(2),
                             dbRows.getString(3),
                             dbRows.getString(4)
+                    ));
+                } while (dbRows.moveToNext());
+                closeDb();
+                if (!candidates.isEmpty()) {
+                    return candidates.get(0);
+                } else {
+                    return null;
+                }
+            } else {
+                closeDb();
+                return null;
+            }
+        } else {
+            throw new SQLiteException("SQLiteAssistant still not initialized.");
+        }
+    }
+
+    public UserShift getUserShift(User u, Date d) throws SQLiteException, ParseException {
+        if (initialized) {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            ArrayList<UserShift> candidates = new ArrayList<>();
+            Cursor dbRows;
+            int userId = u.getIdUser();
+            String date = df.format(d);
+
+            openDb();
+            dbRows = db.query(true, DB_USERSHIFT_TABLE, new String[] {
+                    KEY_USERSHIFT_IDUSER,
+                    KEY_USERSHIFT_IDSHIFT,
+                    KEY_USERSHIFT_DATE
+            }, KEY_USERSHIFT_IDUSER + " = " + userId + " AND " +
+                    KEY_USERSHIFT_DATE + " = '" + date + "'", null, null, null, null, null);
+
+            if (dbRows.moveToFirst()){
+                do {
+                    candidates.add(new UserShift(
+                            u,
+                            getShiftById(dbRows.getInt(1)),
+                            new java.sql.Date(df.parse(dbRows.getString(2)).getTime())
                     ));
                 } while (dbRows.moveToNext());
                 closeDb();
