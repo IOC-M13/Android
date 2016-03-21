@@ -15,9 +15,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.adapters.TabPagerAdapter;
+import com.afodevelop.chronoschedule.controllers.fragments.CalendarFragment;
+import com.afodevelop.chronoschedule.controllers.fragments.ShiftsFragment;
+import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
@@ -86,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute(){
+
+
             progressDialog = new ProgressDialog(MainActivity.this); // -> should target a fragment!
             progressDialog.setIndeterminate(false);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -121,9 +127,9 @@ public class MainActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (exceptionToBeThrown == null) {
                 Log.d("PostExecute", "rendering UI.");
-                //renderUI(); -> but on active fragment!
+                refreshFragments();
             } else {
-                //printToast("Database sync error."); -> but on active fragment!
+                printToast("Database sync error.");
             }
         }
     }
@@ -139,13 +145,18 @@ public class MainActivity extends AppCompatActivity {
     private PendingIntent alarmPendingIntent;
     private JdbcStatusUpdateReceiver jdbcStatusUpdateReceiver;
 
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+    private TabPagerAdapter tabPagerAdapter;
+    private int currentTab;
+
     private boolean menuRendered, isAdmin, connectivity;
     private User user;
 
     // LOGIC
 
     /**
-     *
+     * The onCreate method
      * @param savedInstanceState
      */
     @Override
@@ -167,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
 
         isAdmin = user.isAdmin();
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
+        tabLayout = (TabLayout) findViewById(R.id.tab_layout);
         TabLayout.Tab tmpTab;
         tmpTab = tabLayout.newTab().setText("Calendar");
         tmpTab.setIcon(R.drawable.ic_menu_month);
@@ -182,15 +193,16 @@ public class MainActivity extends AppCompatActivity {
         }
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
-        final TabPagerAdapter tabPagerAdapter = new TabPagerAdapter
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        tabPagerAdapter = new TabPagerAdapter
                 (getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(tabPagerAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
+                currentTab = tab.getPosition();
+                viewPager.setCurrentItem(currentTab);
             }
 
             @Override
@@ -206,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Here we got a reference to the action bar menu and its Items
      * @param menu
      * @return
      */
@@ -231,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * Handle Items clicking on the menu...
      * @param item
      * @return
      */
@@ -258,14 +270,38 @@ public class MainActivity extends AppCompatActivity {
      * Save las state using Android native SharedPreferences persistence
      */
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         unregisterReceiver(jdbcStatusUpdateReceiver);
         alarmManager.cancel(alarmPendingIntent);
     }
 
     /**
-     *
+     * This method triggers refresh method inside current displayed fragment.
+     */
+    private void refreshFragments() {
+        Log.d("refreshFragments","asked to refresh fragment " + currentTab);
+        switch (currentTab) {
+            case 0:
+                CalendarFragment calendarFragment = (CalendarFragment) tabPagerAdapter.
+                        getfragments(currentTab);
+                calendarFragment.refreshData();
+                calendarFragment.refreshCalendarDecoration();
+                calendarFragment.refreshCalendarLegend();
+                break;
+            case 1:
+                UsersFragment usersFragment = (UsersFragment) tabPagerAdapter.
+                        getfragments(currentTab);
+                break;
+            case 2:
+                ShiftsFragment shiftsFragment = (ShiftsFragment) tabPagerAdapter.
+                        getfragments(currentTab);
+                break;
+        }
+    }
+
+    /**
+     * Returns wether or not loged user has administrative rights.
      * @return
      */
     public boolean isAdmin(){
@@ -287,6 +323,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This method is responsable of instantiate, initialize and start both an
+     * AlrManager driven periodic broadcasting event, and an broadcast listener that,
+     * on receiving the advise, trigges connectivity status check.
+     */
     private void initializeConnectivityWatchDog(){
         Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
         alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
@@ -372,6 +413,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return null;
         }
+    }
+
+    /**
+     * An auxiliare method to ease Toast printing
+     * @param s
+     */
+    private void printToast(String s){
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 
 

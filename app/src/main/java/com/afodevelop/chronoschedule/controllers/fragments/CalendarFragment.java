@@ -202,9 +202,16 @@ public class CalendarFragment extends Fragment {
 
     @Override
     public void onPause() {
+
         super.onPause();
     }
 
+    /**
+     * This method launches the FormDay activity, It does it with dynamic Bundle data
+     * based on received arguments
+     * @param date Date of the Day
+     * @param mode mode (new, edit, show)
+     */
     public void launchDayFormActivity(Date date, String mode){
 
         Intent i = new Intent(getActivity(), DayFormActivity.class);
@@ -220,8 +227,9 @@ public class CalendarFragment extends Fragment {
      * Get/Refresh data from DB to fill arrays of strings with most used data
      * usernames, shiftnames and shift colors
      */
-    private void refreshData(){
+    public void refreshData(){
         try {
+            Log.d("calendarFragment","refreshing data");
             userNames = mainActivity.getUserNames();
             shiftNames = mainActivity.getShiftNames();
             shiftColors = mainActivity.getShiftColors();
@@ -234,8 +242,9 @@ public class CalendarFragment extends Fragment {
     /**
      * This method regenerates the calendar colors
      */
-    private void refreshCalendarDecoration(){
+    public void refreshCalendarDecoration(){
         //adding calendar day decorators
+        Log.d("calendarFragment","refreshing calendar decorators");
         filledDays.clear();
         List<DayDecorator> decorators = new ArrayList<>();
         decorators.add(new ColorDecorator());
@@ -246,7 +255,8 @@ public class CalendarFragment extends Fragment {
     /**
      * Encapsulate the calendar generation method
      */
-    private void refreshCalendarLegend(){
+    public void refreshCalendarLegend(){
+        Log.d("calendarFragment","refreshing calendar legend");
         ShiftsLegendListAdapter adapter = new ShiftsLegendListAdapter(getActivity(), shiftColors, shiftNames);
         ListView list = (ListView) myFragmentView.findViewById(R.id.shifts_legend_list);
         list.setAdapter(adapter);

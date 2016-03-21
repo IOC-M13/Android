@@ -1,8 +1,5 @@
 package com.afodevelop.chronoschedule.controllers.activities;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -12,7 +9,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -30,17 +26,15 @@ import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
-import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
-import com.afodevelop.chronoschedule.controllers.ormControllers.OrmException;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
-import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
+import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
+import com.afodevelop.chronoschedule.controllers.ormControllers.OrmException;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
+import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
 import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  * A login screen that offers login via username/password.
@@ -247,15 +241,13 @@ public class LoginActivity extends AppCompatActivity {
         if (dbHost.equalsIgnoreCase("")) {
             Log.d("onCreate","first execution = true");
             firstExecution = true;
-            launchSettings();
+
         } else {
             Log.d("onCreate","first execution = false");
             firstExecution = false;
-
-            //initialize
-            InitializationTask mySQLInitializationTask = new InitializationTask();
-            mySQLInitializationTask.execute();
         }
+
+        renderUI();
     }
 
     /**
@@ -286,10 +278,18 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        InitializationTask mySQLInitializationTask = new InitializationTask();
-        mySQLInitializationTask.execute();
+        if(!firstExecution) {
+            InitializationTask mySQLInitializationTask = new InitializationTask();
+            mySQLInitializationTask.execute();
+        } else {
+            launchSettings();
+        }
     }
 
+    /**
+     * Initialize our MySQL conection assistant
+     * @throws JdbcException
+     */
     private void initializeMySQL() throws JdbcException {
         Log.d("initializeMySQL", "asked to initialize MySQL");
         mySQLConnectorFactory = new MySQLConnectorFactory(
@@ -300,7 +300,10 @@ public class LoginActivity extends AppCompatActivity {
         }
      }
 
-
+    /**
+     * Initialize our SQLite local DB assistant
+     * @throws SQLiteException
+     */
     private void initializeSQLite() throws SQLiteException {
         Log.d("initializeSQLite", "asked to initialize SQLite");
         sqLiteAssistant = SQLiteAssistant.getInstance();
@@ -309,6 +312,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initialize a Memory cache for ORM transactions and cache
+     * @throws OrmException
+     */
     private void initializeORM() throws OrmException {
         Log.d("InitializeORM", "asked to initialize ORM");
         if (mySQLAssistant != null && sqLiteAssistant != null) {
@@ -322,6 +329,11 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This method is responsable of instantiate, initialize and start both an
+     * AlrManager driven periodic broadcasting event, and an broadcast listener that,
+     * on receiving the advise, trigges connectivity status check.
+     */
     private void initializeConnectivityWatchDog(){
         Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
         alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
@@ -336,11 +348,14 @@ public class LoginActivity extends AppCompatActivity {
         registerReceiver(jdbcStatusUpdateReceiver, filter);
     }
 
+    /**
+     * This method takes charge of instantiating, and initializing the UI.
+     */
     private void renderUI() {
         // Set up the login form.
         Log.d("renderUI", "Asked to render the UI");
         if (!uiRendered) {
-            Log.d("renderUI", "UI already rendered, Skipping Views re-render.");
+            Log.d("renderUI", "UI still unrendered, rendering....");
             mUsernameView = (EditText) findViewById(R.id.username);
             mPasswordView = (EditText) findViewById(R.id.password);
             mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -365,12 +380,19 @@ public class LoginActivity extends AppCompatActivity {
             mLoginFormView = findViewById(R.id.login_form);
             mProgressView = findViewById(R.id.login_progress);
             uiRendered = true;
+        } else {
+            Log.d("renderUI", "UI already rendered, Skipping Views re-render.");
         }
 
         Log.d("renderUI", "Asking to re-render the Menu");
         invalidateOptionsMenu();
     }
 
+    /**
+     * The main logic method is called separatelly, and after initialization,
+     * because it simply controls the flow of program execution based on
+     * all previous environment setup.
+     */
     private void mainLogic(){
         Log.d("execute", "firstexecution: " + firstExecution + ", connectivity: " + connectivity);
         // Main logic flow happens here...
@@ -522,8 +544,8 @@ public class LoginActivity extends AppCompatActivity {
                 extras = data.getExtras();
                 dbPort = extras.getString(SP_KEY_DBPORT);
                 dbHost = extras.getString(SP_KEY_DBHOST);
-
                 //initialize
+                firstExecution = false;
                 InitializationTask mySQLInitializationTask = new InitializationTask();
                 mySQLInitializationTask.execute();
 
@@ -561,11 +583,13 @@ public class LoginActivity extends AppCompatActivity {
      * Save las state using Android native SharedPreferences persistence
      */
     @Override
-    protected void onPause() {
-        super.onPause();
-        storePreferences(dbHost, dbPort);
-        unregisterReceiver(jdbcStatusUpdateReceiver);
-        alarmManager.cancel(alarmPendingIntent);
+    protected void onStop() {
+        super.onStop();
+        if(!firstExecution) {
+            storePreferences(dbHost, dbPort);
+            unregisterReceiver(jdbcStatusUpdateReceiver);
+            alarmManager.cancel(alarmPendingIntent);
+        }
     }
 
     /**
