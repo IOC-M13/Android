@@ -78,9 +78,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
-
+        <TextView
+            android:id="@+id/edit_user_password_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
 
         <LinearLayout
@@ -109,9 +115,15 @@
             android:id="@+id/edit_user_dni_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
-
+        <TextView
+            android:id="@+id/edit_user_dni_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
 
         <LinearLayout
@@ -140,14 +152,20 @@
             android:id="@+id/edit_user_fullname_edittext"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
-
+        <TextView
+            android:id="@+id/edit_user_fullname_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/confirm_usershift_button"
+        android:id="@+id/edit_user_savebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"

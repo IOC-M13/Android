@@ -137,7 +137,7 @@ public class CalendarFragment extends Fragment {
 
                     Intent i = new Intent(getActivity(), UserFormActivity.class);
                     Bundle extras = new Bundle();
-                    extras.putBoolean("isNew", false);
+                    extras.putString("mode", "show");
                     extras.putString("user", mainActivity.getUser().getUserName());
                     i.putExtras(extras);
                     startActivity(i);
@@ -181,8 +181,7 @@ public class CalendarFragment extends Fragment {
             @Override
             public void onMonthChanged(Date date) {
                 // HANDLE SWITCH TO NEXT/PREV MONTH
-                calendarView.refreshCalendar(currentCalendar);
-                refreshCalendarDecoration();
+
             }
         });
 
@@ -192,18 +191,16 @@ public class CalendarFragment extends Fragment {
         return myFragmentView;
     }
 
+    /**
+     * We are using the onResume flow call to prompt for calendar refreshing:
+     * Refreshthe data, the decoration, and apply all this again to the calendar
+     */
     @Override
     public void onResume() {
         super.onResume();
         refreshData();
         refreshCalendarDecoration();
         refreshCalendarLegend();
-    }
-
-    @Override
-    public void onPause() {
-
-        super.onPause();
     }
 
     /**

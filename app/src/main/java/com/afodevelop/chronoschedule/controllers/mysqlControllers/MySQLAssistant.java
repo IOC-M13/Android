@@ -7,6 +7,7 @@ import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -24,6 +25,16 @@ public class MySQLAssistant {
     private static final String USERS_SELECT = "SELECT * FROM Users";
     private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
     private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
+    private static final String USER_INSERT = "INSERT INTO Users " +
+            "(userDni, userName, realName, pass, admin) VALUES (?, ?, ?, ?, ?)";
+    private static final String USER_UPDATE = "UPDATE Users SET " +
+            "userDni = ?, userName = ?, realName = ?, pass = ?, admin = ? " +
+            "WHERE idUser = ?;";
+    private static final String SHIFT_INSERT = "INSERT INTO Shifts " +
+            "(name, startTime, endTime, color) VALUES (?, ?, ?, ?)";
+    private static final String USERSHIFT_INSERT= "INSERT INTO UserShifts " +
+            "(idUser, idShift, date) VALUES (?, ?, ?)";
+
 
     //CLASSWIDE VARIABLES
     private boolean initialized = false;
@@ -32,8 +43,6 @@ public class MySQLAssistant {
 
     //CONSTRUCTOR
     private MySQLAssistant(){}
-
-
 
     //LOGIC
 
@@ -178,7 +187,7 @@ public class MySQLAssistant {
             ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
 
             while (userShifts.next()){
-                cache.addUserShift(userShifts.getInt(1),userShifts.getInt(2),userShifts.getDate(3));
+                cache.addUserShift(userShifts.getInt(1), userShifts.getInt(2), userShifts.getDate(3));
             }
             closeConnection();
 
@@ -206,11 +215,52 @@ public class MySQLAssistant {
                 Log.w("JDBC", "While checking MySQL connectivity: caught ClassNotFoundException");
                 e.printStackTrace();
             }
-            Log.d("JDBC","Check connectivity failure! returning false.");
+            Log.d("JDBC", "Check connectivity failure! returning false.");
             return false;
         } else {
             throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
+    }
+
+    /**
+     *
+     * @param newUser
+     * @throws SQLException
+     * @throws JdbcException
+     * @throws ClassNotFoundException
+     */
+    public void insertUser(User newUser) throws SQLException, JdbcException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USER_INSERT);
+        preparedStmt.setString(1, newUser.getDniUser());
+        preparedStmt.setString(2, newUser.getUserName());
+        preparedStmt.setString(3, newUser.getRealName());
+        preparedStmt.setString(4, newUser.getPass());
+        preparedStmt.setInt(5, newUser.getAdmin());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
+
+    /**
+     *
+     * @param targetUser
+     * @throws SQLException
+     * @throws JdbcException
+     * @throws ClassNotFoundException
+     */
+    public void updateUser(User targetUser) throws SQLException, JdbcException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USER_UPDATE);
+        preparedStmt.setString(1, targetUser.getDniUser());
+        preparedStmt.setString(2, targetUser.getUserName());
+        preparedStmt.setString(3, targetUser.getRealName());
+        preparedStmt.setString(4, targetUser.getPass());
+        preparedStmt.setInt(5, targetUser.getAdmin());
+        preparedStmt.setInt(6, targetUser.getIdUser());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
     }
 
     /**
