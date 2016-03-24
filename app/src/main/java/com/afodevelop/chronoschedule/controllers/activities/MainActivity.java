@@ -310,11 +310,11 @@ public class MainActivity extends AppCompatActivity {
      */
     private void refreshFragments() {
         Log.d("refreshFragments", "asked to refresh fragment " + currentTab);
+        CalendarFragment calendarFragment = (CalendarFragment) tabPagerAdapter.
+                getfragments(0);
         switch (currentTab) {
             case 0:
                 Log.d("refreshFragments", "refresh calendar fragment");
-                CalendarFragment calendarFragment = (CalendarFragment) tabPagerAdapter.
-                        getfragments(currentTab);
                 calendarFragment.refreshData();
                 calendarFragment.refreshCalendarDecoration();
                 calendarFragment.refreshCalendarLegend();
@@ -322,13 +322,14 @@ public class MainActivity extends AppCompatActivity {
             case 1:
                 Log.d("refreshFragments", "refresh users fragment");
                 UsersFragment usersFragment = (UsersFragment) tabPagerAdapter.
-                        getfragments(currentTab);
+                        getfragments(1);
                 usersFragment.refreshData();
+                calendarFragment.refreshData();
                 break;
             case 2:
                 Log.d("refreshFragments", "refresh shifts fragment");
                 ShiftsFragment shiftsFragment = (ShiftsFragment) tabPagerAdapter.
-                        getfragments(currentTab);
+                        getfragments(2);
                 break;
         }
     }

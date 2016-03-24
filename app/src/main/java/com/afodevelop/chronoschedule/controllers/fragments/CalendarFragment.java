@@ -50,6 +50,7 @@ public class CalendarFragment extends Fragment {
     private CustomCalendarView calendarView;
     private View myFragmentView;
     private Spinner spinner;
+    private ArrayAdapter<String> spinnerAdapter;
     private LinearLayout selectedUserLayout;
     private TextView selectedUserText;
     private SimpleDateFormat df, dm;
@@ -78,7 +79,6 @@ public class CalendarFragment extends Fragment {
         }
     }
 
-
     // LOGIC
 
     @Override
@@ -93,98 +93,15 @@ public class CalendarFragment extends Fragment {
         // Initialize early values
         refreshData();
 
-
+        // Initialize either spinner or user bar
         if (mainActivity.isAdmin()) {
-            spinner = (Spinner) myFragmentView.findViewById(R.id.calendar_user_spinner);
-            // Create an ArrayAdapter using the string array and a default spinner layout
-            ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item, userNames);
-            // Specify the layout to use when the list of choices appears
-            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            // Apply the adapter to the spinner
-            spinner.setAdapter(spinnerAdapter);
-            int selectedPosition = spinnerAdapter.getPosition(calendarUser.getUserName());
-            spinner.setSelection(selectedPosition);
-            spinner.setVisibility(View.VISIBLE);
-
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    try {
-                        calendarUser = mainActivity.getSqLiteAssistant().
-                                getUserByUserName(userNames[position]);
-                        refreshCalendarDecoration();
-                    } catch (SQLiteException e) {
-                        printToast("Error fetching data from DB.");
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-
+            setupSpinner();
         } else {
-
-            selectedUserText = (TextView) myFragmentView.findViewById(R.id.calendar_user_text);
-            selectedUserText.setText(mainActivity.getUser().getRealName());
-            selectedUserLayout = (LinearLayout) myFragmentView.findViewById(R.id.selected_user_layout);
-            selectedUserLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    Intent i = new Intent(getActivity(), UserFormActivity.class);
-                    Bundle extras = new Bundle();
-                    extras.putString("mode", "show");
-                    extras.putString("user", mainActivity.getUser().getUserName());
-                    i.putExtras(extras);
-                    startActivity(i);
-
-                }
-            });
-            selectedUserLayout.setVisibility(View.VISIBLE);
-
+            setupUserBar();
         }
 
-        //Initialize CustomCalendarView from layout
-        calendarView = (CustomCalendarView) myFragmentView.findViewById(R.id.calendar_view);
-        //Initialize calendar with date
-        currentCalendar = Calendar.getInstance(Locale.getDefault());
-        //Show monday as first date of week
-        calendarView.setFirstDayOfWeek(Calendar.MONDAY);
-        //Show/hide overflow days of a month
-        calendarView.setShowOverflowDate(false);
-        //call refreshCalendar to update calendar the view
-        calendarView.refreshCalendar(currentCalendar);
-        //Handling custom calendar events
-        df = new SimpleDateFormat("yyyy-MM-dd");
-        dm = new SimpleDateFormat("MM-yyyy");
-        calendarView.setCalendarListener(new CalendarListener() {
-            @Override
-            public void onDateSelected(Date date) {
-                // HANDLE CLICK ON CALENDAR DAY
-                if (mainActivity.isAdmin()){
-                    if (filledDays.get(date)){
-                        launchDayFormActivity(date, "edit");
-                    } else {
-                        launchDayFormActivity(date, "new");
-                    }
-                } else {
-                    if (filledDays.get(date)){
-                        launchDayFormActivity(date, "show");
-                    }
-                }
-            }
-
-            @Override
-            public void onMonthChanged(Date date) {
-                // HANDLE SWITCH TO NEXT/PREV MONTH
-
-            }
-        });
-
+        // Initialize the calendar and initial decoration
+        setupCalendar();
         refreshCalendarDecoration();
         refreshCalendarLegend();
 
@@ -201,6 +118,65 @@ public class CalendarFragment extends Fragment {
         refreshData();
         refreshCalendarDecoration();
         refreshCalendarLegend();
+    }
+
+    /**
+     * A method that creates the non-admin user name clickable bar
+     */
+    private void setupUserBar(){
+        selectedUserText = (TextView) myFragmentView.findViewById(R.id.calendar_user_text);
+        selectedUserText.setText(mainActivity.getUser().getRealName());
+        selectedUserLayout = (LinearLayout) myFragmentView.findViewById(R.id.selected_user_layout);
+        selectedUserLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent i = new Intent(getActivity(), UserFormActivity.class);
+                Bundle extras = new Bundle();
+                extras.putString("mode", "show");
+                extras.putString("user", mainActivity.getUser().getUserName());
+                i.putExtras(extras);
+                startActivity(i);
+            }
+        });
+        selectedUserLayout.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Setup a spinner for admin users so they can choose which user they want to
+     * work onto.
+     */
+    private void setupSpinner(){
+        spinner = (Spinner) myFragmentView.findViewById(R.id.calendar_user_spinner);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        spinnerAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, userNames);
+        // Specify the layout to use when the list of choices appears
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(spinnerAdapter);
+        int selectedPosition = spinnerAdapter.getPosition(calendarUser.getUserName());
+        spinner.setSelection(selectedPosition);
+        spinner.setVisibility(View.VISIBLE);
+        spinnerAdapter.notifyDataSetChanged();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                try {
+                    calendarUser = mainActivity.getSqLiteAssistant().
+                            getUserByUserName(userNames[position]);
+                    refreshCalendarDecoration();
+                } catch (SQLiteException e) {
+                    printToast("Error fetching data from DB.");
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
     /**
@@ -230,10 +206,49 @@ public class CalendarFragment extends Fragment {
             userNames = mainActivity.getUserNames();
             shiftNames = mainActivity.getShiftNames();
             shiftColors = mainActivity.getShiftColors();
+            if (spinnerAdapter != null) {
+                setupSpinner();
+            }
         } catch (SQLiteException e) {
             printToast("Error fetching data from DB.");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * This method actually instantiates and sets up the calendar View on the
+     * fragment, initializing dateformats, week format, current date, and setting
+     * the preceptive click listener.
+     */
+    public void setupCalendar(){
+        calendarView = (CustomCalendarView) myFragmentView.findViewById(R.id.calendar_view);
+        currentCalendar = Calendar.getInstance(Locale.getDefault());
+        df = new SimpleDateFormat("yyyy-MM-dd");
+        dm = new SimpleDateFormat("MM-yyyy");
+
+        calendarView.setFirstDayOfWeek(Calendar.MONDAY);
+        calendarView.setShowOverflowDate(false);
+        calendarView.refreshCalendar(currentCalendar);
+        calendarView.setCalendarListener(new CalendarListener() {
+            @Override
+            public void onDateSelected(Date date) {
+                if (mainActivity.isAdmin()){
+                    if (filledDays.get(date)){
+                        launchDayFormActivity(date, "edit");
+                    } else {
+                        launchDayFormActivity(date, "new");
+                    }
+                } else {
+                    if (filledDays.get(date)){
+                        launchDayFormActivity(date, "show");
+                    }
+                }
+            }
+            @Override
+            public void onMonthChanged(Date date) {
+
+            }
+        });
     }
 
     /**
@@ -257,6 +272,7 @@ public class CalendarFragment extends Fragment {
         ShiftsLegendListAdapter adapter = new ShiftsLegendListAdapter(getActivity(), shiftColors, shiftNames);
         ListView list = (ListView) myFragmentView.findViewById(R.id.shifts_legend_list);
         list.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     /**
@@ -284,7 +300,7 @@ public class CalendarFragment extends Fragment {
     }
 
     /**
-     * An auxiliare method to ease Toast printing
+     * An auxiliar method to ease Toast printing
      * @param s
      */
     private void printToast(String s){

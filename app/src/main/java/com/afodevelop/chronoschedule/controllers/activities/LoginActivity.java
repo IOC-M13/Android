@@ -489,8 +489,10 @@ public class LoginActivity extends AppCompatActivity {
             // Perform login attempt.
             try {
                 User candidate = sqLiteAssistant.getUserByUserName(username);
-                if (candidate.getPass().contentEquals(password)){
-                    signIn(candidate);
+                if (candidate != null){
+                    if (candidate.getPass().contentEquals(password)) {
+                        signIn(candidate);
+                    }
                 } else {
                     printToast("Wrong username or password.");
                 }
