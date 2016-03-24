@@ -22,6 +22,19 @@ public class User {
         this.pass = pass;
     }
 
+    public User(int id, boolean admin, String dni, String uName, String rName, String pass) {
+        this.idUser = id;
+        if (admin) {
+            this.admin = 1;
+        } else {
+            this.admin = 0;
+        }
+        this.dniUser = dni;
+        this.userName = uName;
+        this.realName = rName;
+        this.pass = pass;
+    }
+
     // LOGIC
     public boolean isAdmin(){
         return (admin == 1);
@@ -41,8 +54,13 @@ public class User {
         return admin;
     }
 
-    public void setAdmin(int admin) {
-        this.admin = admin;
+    public void setAdmin(boolean admin)
+    {
+        if (admin) {
+            this.admin = 1;
+        } else {
+            this.admin = 0;
+        }
     }
 
     public String getDniUser() {

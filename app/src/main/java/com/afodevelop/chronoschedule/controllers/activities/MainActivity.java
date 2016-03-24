@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            Log.d("mainactivity","connectivity status update: " + connectivity);
             invalidateOptionsMenu();
         }
     }
@@ -90,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute(){
-
 
             progressDialog = new ProgressDialog(MainActivity.this); // -> should target a fragment!
             progressDialog.setIndeterminate(false);
@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentTab;
 
     private boolean menuRendered, isAdmin, connectivity;
+    private boolean UIrendered = false;
     private User user;
 
     // LOGIC
@@ -260,10 +261,37 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * An external handler to allow for manually trigegring a full DB Connectivity check
+     */
+    public void forceConnectivityCheck(){
+        Log.d("mainactivity","asked to force a data resync.");
+        CheckConnectivityTask checkConnectivityTask = new CheckConnectivityTask();
+        checkConnectivityTask.execute();
+    }
+
+    /**
+     * An external handler to allow for manually triggering a full DB resync
+     */
+    public void forceResync(){
+        if (connectivity) {
+            Log.d("mainactivity","asked to force a data resync.");
+            ResyncTask resyncTask = new ResyncTask();
+            resyncTask.execute();
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        initializeConnectivityWatchDog();
+        Log.d("mainactivity", "resuming...");
+        forceConnectivityCheck();
+        forceResync();
+        if (UIrendered) {
+            initializeConnectivityWatchDog();
+        } else {
+            UIrendered = true;
+        }
     }
 
     /**
@@ -272,6 +300,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d("mainactivity","stopping");
         unregisterReceiver(jdbcStatusUpdateReceiver);
         alarmManager.cancel(alarmPendingIntent);
     }
@@ -280,9 +309,10 @@ public class MainActivity extends AppCompatActivity {
      * This method triggers refresh method inside current displayed fragment.
      */
     private void refreshFragments() {
-        Log.d("refreshFragments","asked to refresh fragment " + currentTab);
+        Log.d("refreshFragments", "asked to refresh fragment " + currentTab);
         switch (currentTab) {
             case 0:
+                Log.d("refreshFragments", "refresh calendar fragment");
                 CalendarFragment calendarFragment = (CalendarFragment) tabPagerAdapter.
                         getfragments(currentTab);
                 calendarFragment.refreshData();
@@ -290,10 +320,13 @@ public class MainActivity extends AppCompatActivity {
                 calendarFragment.refreshCalendarLegend();
                 break;
             case 1:
+                Log.d("refreshFragments", "refresh users fragment");
                 UsersFragment usersFragment = (UsersFragment) tabPagerAdapter.
                         getfragments(currentTab);
+                usersFragment.refreshData();
                 break;
             case 2:
+                Log.d("refreshFragments", "refresh shifts fragment");
                 ShiftsFragment shiftsFragment = (ShiftsFragment) tabPagerAdapter.
                         getfragments(currentTab);
                 break;
@@ -329,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
      * on receiving the advise, trigges connectivity status check.
      */
     private void initializeConnectivityWatchDog(){
+        Log.d("mainactivity","Setting the connectivity watchdog");
         Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
         alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -359,6 +393,21 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return null;
         }
+    }
+
+
+    /**
+     * This method calls for user deletion on DB. Target user is passed as argument
+     * @param user User to be deleted
+     * @throws SQLiteException
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void deleteUser(String user) throws SQLiteException, JdbcException,
+            SQLException, ClassNotFoundException {
+        User targetUser = sqLiteAssistant.getUserByUserName(user);
+        mySQLAssistant.deleteUser(targetUser);
     }
 
     /**
@@ -440,5 +489,9 @@ public class MainActivity extends AppCompatActivity {
 
     public SQLiteAssistant getSqLiteAssistant() {
         return sqLiteAssistant;
+    }
+
+    public boolean hasConnectivty() {
+        return connectivity;
     }
 }

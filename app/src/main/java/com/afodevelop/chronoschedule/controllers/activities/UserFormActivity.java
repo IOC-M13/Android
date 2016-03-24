@@ -12,7 +12,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,11 +60,61 @@ public class UserFormActivity extends AppCompatActivity {
             Log.d("inBackgroud", "END, returning");
             return null;
         }
+    }
+
+    /**
+     * This class is an AsyncTask based task that performs a user data update.
+     */
+    private class UpdateUserTask extends AsyncTask<Void, Void, Void>{
+
+        private Exception exceptionToBeThrown;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                mySQLAssistant.updateUser(user);
+            } catch (SQLException | JdbcException | ClassNotFoundException e) {
+                exceptionToBeThrown = e;
+            }
+            return null;
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            invalidateOptionsMenu();
+            if (exceptionToBeThrown == null){
+                printToast("User data successfully updated!");
+            } else {
+                printToast("Error occurred while updating user in DB");
+            }
+        }
+    }
+
+    /**
+     * This class is an AsyncTask based task that performs a user data update.
+     */
+    private class CreateUserTask extends AsyncTask<Void, Void, Void>{
+
+        private Exception exceptionToBeThrown;
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            try {
+                mySQLAssistant.insertUser(user);
+            } catch (SQLException | JdbcException | ClassNotFoundException e) {
+                exceptionToBeThrown = e;
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (exceptionToBeThrown == null){
+                printToast("User successfully created!");
+            } else {
+                printToast("Error occurred while created user in DB");
+            }
         }
     }
 
@@ -81,6 +133,9 @@ public class UserFormActivity extends AppCompatActivity {
     private EditText dniEditText;
     private TextView fullNameText;
     private EditText fullNameEditText;
+    private CheckBox adminCheckBox;
+    private LinearLayout edit_user_labellayout_admin;
+    private LinearLayout edit_user_checkboxlayout_admin;
     private FloatingActionButton saveButton;
 
     private String mode;
@@ -124,10 +179,11 @@ public class UserFormActivity extends AppCompatActivity {
         checkConnectivity.execute();
         initializeConnectivityWatchDog();
         renderUI(true, true, true);
-        userNameText.setText("");
+        userNameEditText.setText("");
         passwordEditText.setText("");
         dniEditText.setText("");
         fullNameEditText.setText("");
+        adminCheckBox.setChecked(false);
     }
 
     /**
@@ -147,6 +203,7 @@ public class UserFormActivity extends AppCompatActivity {
             passwordEditText.setText(user.getPass());
             dniEditText.setText(user.getDniUser());
             fullNameEditText.setText(user.getRealName());
+            adminCheckBox.setChecked(user.isAdmin());
         } catch (SQLiteException e) {
             printToast("Error accessing DB.");
             e.printStackTrace();
@@ -192,6 +249,12 @@ public class UserFormActivity extends AppCompatActivity {
             dniEditText.setVisibility(View.VISIBLE);
             fullNameEditText = (EditText) findViewById(R.id.edit_user_fullname_edittext);
             fullNameEditText.setVisibility(View.VISIBLE);
+            edit_user_labellayout_admin = (LinearLayout) findViewById(R.id.edit_user_labellayout_admin);
+            edit_user_labellayout_admin.setVisibility(View.VISIBLE);
+            edit_user_checkboxlayout_admin = (LinearLayout) findViewById(R.id.edit_user_checkboxlayout_admin);
+            edit_user_checkboxlayout_admin.setVisibility(View.VISIBLE);
+            adminCheckBox = (CheckBox) findViewById(R.id.edit_user_Admin_checkbox);
+            adminCheckBox.setVisibility(View.VISIBLE);
         } else {
             passwordText = (TextView) findViewById(R.id.edit_user_password_text);
             passwordText.setVisibility(View.VISIBLE);
@@ -233,31 +296,26 @@ public class UserFormActivity extends AppCompatActivity {
     }
 
     /**
-     *
+     * This method triggers the final sentences against DB to persist the new user
+     * Or to persist current user changes.
      */
     private void saveUser(){
         if (isUpdate){
             user.setRealName(fullNameEditText.getText().toString());
             user.setDniUser(dniEditText.getText().toString());
             user.setPass(passwordEditText.getText().toString());
-            try {
-                mySQLAssistant.updateUser(user);
-            } catch (SQLException | JdbcException | ClassNotFoundException e) {
-                printToast("Error inserting data into DB.");
-                e.printStackTrace();
-            }
+            user.setAdmin(adminCheckBox.isChecked());
+            UpdateUserTask updateUserTask = new UpdateUserTask();
+            updateUserTask.execute();
         } else {
-            user = new User(0, 0,
+            user = new User(0,
+                    adminCheckBox.isChecked(),
                     dniEditText.getText().toString(),
                     userNameEditText.getText().toString(),
                     fullNameEditText.getText().toString(),
                     passwordEditText.getText().toString());
-            try {
-                mySQLAssistant.insertUser(user);
-            } catch (SQLException | JdbcException | ClassNotFoundException e) {
-                printToast("Error updating data into DB.");
-                e.printStackTrace();
-            }
+            CreateUserTask createUserTask = new CreateUserTask();
+            createUserTask.execute();
         }
         finish();
     }

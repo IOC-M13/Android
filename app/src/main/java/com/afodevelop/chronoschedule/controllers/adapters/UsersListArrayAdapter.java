@@ -1,11 +1,7 @@
 package com.afodevelop.chronoschedule.controllers.adapters;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +10,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.controllers.activities.UserFormActivity;
+import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
 
 import java.util.ArrayList;
 
@@ -23,22 +19,26 @@ import java.util.ArrayList;
  */
 public class UsersListArrayAdapter extends ArrayAdapter<String> {
 
+    // CLASS-WIDE VARIABLES
     Context context;
+    UsersFragment parentFragment;
     int layoutResourceId;
     String user;
     ArrayList<String> data = new ArrayList<String>();
 
-
+    // CONSTRUCTOR
     public UsersListArrayAdapter(Context context, int layoutResourceId,
-                             ArrayList<String> data) {
+                             ArrayList<String> data, UsersFragment parentFragment) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
+        this.parentFragment = parentFragment;
     }
 
+    // LOGIC
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
         View row = convertView;
         UserHolder holder = null;
 
@@ -58,41 +58,15 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
         holder.itemName.setText(user);
 
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                Intent i = new Intent(context, UserFormActivity.class);
-                Bundle extras = new Bundle();
-                extras.putBoolean("isNew", false);
-                extras.putString("user", user);
-                i.putExtras(extras);
-                context.startActivity(i);
-
+                parentFragment.editUser(user);
             }
         });
-
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(context);
-                myAlertDialog.setTitle("DELETE WARNING!");
-                myAlertDialog.setMessage("Please confirm deletion of item");
-                myAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        // do something when the OK button is clicked
-                    }});
-                myAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        // do something when the Cancel button is clicked
-                    }});
-                myAlertDialog.show();
-
-
+                parentFragment.deleteUser(user);
             }
         });
 
@@ -104,6 +78,4 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
         ImageButton btnEdit;
         TextView itemName;
     }
-
-
 }

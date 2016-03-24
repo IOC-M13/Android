@@ -162,6 +162,55 @@
             android:textSize="16sp"
             android:visibility="gone"/>
 
+        <LinearLayout
+            android:id="@+id/edit_user_labellayout_admin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_lock_idle_lock"
+                android:layout_marginRight="10dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:text="@string/edit_user_label_admin"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/edit_user_checkboxlayout_admin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:visibility="gone">
+
+            <CheckBox
+                android:id="@+id/edit_user_Admin_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10px"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="12sp"
+                android:text="@string/edit_user_label_checkboxtext"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton

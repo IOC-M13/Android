@@ -44,6 +44,7 @@
     <string name="edit_user_label_password">User login password:</string>
     <string name="edit_user_label_dni">User ID/DNI number:</string>
     <string name="edit_user_label_fullname">Full user name:</string>
-
+    <string name="edit_user_label_admin">User permissions:</string>
+    <string name="edit_user_label_checkboxtext">Administrator</string>
 
 </resources>

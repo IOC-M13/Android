@@ -30,6 +30,7 @@ public class MySQLAssistant {
     private static final String USER_UPDATE = "UPDATE Users SET " +
             "userDni = ?, userName = ?, realName = ?, pass = ?, admin = ? " +
             "WHERE idUser = ?;";
+    private static final String USER_DELETE = "DELETE FROM Users WHERE userName = ?;";
     private static final String SHIFT_INSERT = "INSERT INTO Shifts " +
             "(name, startTime, endTime, color) VALUES (?, ?, ?, ?)";
     private static final String USERSHIFT_INSERT= "INSERT INTO UserShifts " +
@@ -242,6 +243,15 @@ public class MySQLAssistant {
         closeConnection();
     }
 
+    public void deleteUser(User targetUser) throws SQLException, JdbcException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USER_DELETE);
+        preparedStmt.setString(1, targetUser.getUserName());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
+
     /**
      *
      * @param targetUser
@@ -262,6 +272,8 @@ public class MySQLAssistant {
         preparedStmt.executeUpdate();
         closeConnection();
     }
+
+
 
     /**
      *
