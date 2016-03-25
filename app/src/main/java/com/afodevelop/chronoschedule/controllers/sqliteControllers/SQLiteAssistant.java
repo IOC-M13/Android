@@ -471,6 +471,24 @@ public class SQLiteAssistant {
     }
 
     /**
+     * This method builds an array of strings with all shift names in DB
+     * @return
+     * @throws SQLiteException
+     */
+    public String[] getShiftNames() throws SQLiteException {
+        ArrayList<Shift> shifts = getAllShifts();
+        if (!shifts.isEmpty()) {
+            String[] result = new String[shifts.size()];
+            for (int i = 0; i < shifts.size(); i++) {
+                result[i] = shifts.get(i).getName();
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * This method returns a cursor with the rows containing certain items by key field.
      * Theoretically, just a single row in resulting cursor should be present...
      * @param userName
@@ -607,6 +625,15 @@ public class SQLiteAssistant {
         }
     }
 
+    /**
+     * This method returns an UserShift object from DB based on a query that has
+     * User and date search filters. Those data are received as arguments
+     * @param u the user we want to filter the search.
+     * @param d the date at which we are looking for.
+     * @return
+     * @throws SQLiteException
+     * @throws ParseException
+     */
     public UserShift getUserShift(User u, Date d) throws SQLiteException, ParseException {
         if (initialized) {
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");

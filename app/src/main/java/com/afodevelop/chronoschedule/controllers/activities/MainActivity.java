@@ -288,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
         forceConnectivityCheck();
         forceResync();
         if (UIrendered) {
+            Log.d("mainactivity","UIRendered on Resume");
             initializeConnectivityWatchDog();
         } else {
             UIrendered = true;
@@ -409,24 +410,6 @@ public class MainActivity extends AppCompatActivity {
             SQLException, ClassNotFoundException {
         User targetUser = sqLiteAssistant.getUserByUserName(user);
         mySQLAssistant.deleteUser(targetUser);
-    }
-
-    /**
-     * This method builds an array of strings with all shift names in DB
-     * @return
-     * @throws SQLiteException
-     */
-    public String[] getShiftNames() throws SQLiteException {
-        ArrayList<Shift> shifts = sqLiteAssistant.getAllShifts();
-        if (!shifts.isEmpty()) {
-            String[] result = new String[shifts.size()];
-            for (int i = 0; i < shifts.size(); i++) {
-                result[i] = shifts.get(i).getName();
-            }
-            return result;
-        } else {
-            return null;
-        }
     }
 
     /**

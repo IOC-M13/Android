@@ -5,6 +5,7 @@ import android.util.Log;
 import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
+import com.afodevelop.chronoschedule.model.UserShift;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -23,18 +24,26 @@ public class MySQLAssistant {
     private static MySQLAssistant ourInstance = null;
 
     private static final String USERS_SELECT = "SELECT * FROM Users";
-    private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
-    private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
     private static final String USER_INSERT = "INSERT INTO Users " +
             "(userDni, userName, realName, pass, admin) VALUES (?, ?, ?, ?, ?)";
     private static final String USER_UPDATE = "UPDATE Users SET " +
             "userDni = ?, userName = ?, realName = ?, pass = ?, admin = ? " +
             "WHERE idUser = ?;";
     private static final String USER_DELETE = "DELETE FROM Users WHERE userName = ?;";
+
+
+    private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
     private static final String SHIFT_INSERT = "INSERT INTO Shifts " +
             "(name, startTime, endTime, color) VALUES (?, ?, ?, ?)";
-    private static final String USERSHIFT_INSERT= "INSERT INTO UserShifts " +
+
+    private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
+    private static final String USERSHIFT_INSERT = "INSERT INTO UserShifts " +
             "(idUser, idShift, date) VALUES (?, ?, ?)";
+    private static final String USERSHIFT_UPDATE = "UPDATE UserShifts SET " +
+            "idShift = ? " +
+            "WHERE idUser = ? AND date = ?;";
+    private static final String USERSHIFT_DELETE = "DELETE FROM UserShifts " +
+            "WHERE idUser = ? AND date = ?;";
 
 
     //CLASSWIDE VARIABLES
@@ -273,7 +282,58 @@ public class MySQLAssistant {
         closeConnection();
     }
 
+    /**
+     *
+     * @param s
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void insertUserShift(UserShift s) throws JdbcException, SQLException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USERSHIFT_INSERT);
+        preparedStmt.setInt(1, s.getuser().getIdUser());
+        preparedStmt.setInt(2, s.getShift().getIdShift());
+        preparedStmt.setDate(3, s.getDate());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
 
+    /**
+     *
+     * @param s
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void deleteUserShift(UserShift s) throws JdbcException, SQLException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USERSHIFT_DELETE);
+        preparedStmt.setInt(1, s.getuser().getIdUser());
+        preparedStmt.setDate(2, s.getDate());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
+
+    /**
+     *
+     * @param s
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void updateUserShift(UserShift s) throws JdbcException, SQLException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USERSHIFT_UPDATE);
+        preparedStmt.setInt(1, s.getShift().getIdShift());
+        preparedStmt.setInt(2, s.getuser().getIdUser());
+        preparedStmt.setDate(3, s.getDate());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
 
     /**
      *
@@ -282,8 +342,8 @@ public class MySQLAssistant {
      */
     public void openConnection() throws SQLException, ClassNotFoundException, JdbcException {
         if (initialized) {
-        Log.d("JDBC","openning database");
-        mySQLConnection = mySQLConnectorFactory.getConnection();
+            Log.d("JDBC","openning database");
+            mySQLConnection = mySQLConnectorFactory.getConnection();
         } else {
             throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
@@ -307,3 +367,4 @@ public class MySQLAssistant {
 
 
 }
+

@@ -204,7 +204,7 @@ public class CalendarFragment extends Fragment {
         try {
             Log.d("calendarFragment","refreshing data");
             userNames = mainActivity.getUserNames();
-            shiftNames = mainActivity.getShiftNames();
+            shiftNames = mainActivity.getSqLiteAssistant().getShiftNames();
             shiftColors = mainActivity.getShiftColors();
             if (spinnerAdapter != null) {
                 setupSpinner();
@@ -276,7 +276,7 @@ public class CalendarFragment extends Fragment {
     }
 
     /**
-     * This method queries the class selsected calendar user UserShift entries for a given
+     * This method queries the selected user's calendar UserShift entries for a given
      * data. It returns the Shift color for that day
      * @param cell The Day Cell (a Calendar Date) to be queried
      * @return a String with hex color

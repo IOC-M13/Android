@@ -207,6 +207,7 @@ public class UserFormActivity extends AppCompatActivity {
         } catch (SQLiteException e) {
             printToast("Error accessing DB.");
             e.printStackTrace();
+            finish();
         }
     }
 
@@ -226,6 +227,7 @@ public class UserFormActivity extends AppCompatActivity {
         } catch (SQLiteException e) {
             printToast("Error accessing DB.");
             e.printStackTrace();
+            finish();
         }
     }
 
@@ -373,6 +375,4 @@ public class UserFormActivity extends AppCompatActivity {
     private void printToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
-
-
 }

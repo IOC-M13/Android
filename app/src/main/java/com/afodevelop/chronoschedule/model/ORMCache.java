@@ -62,10 +62,6 @@ public class ORMCache {
     }
 
     public void addUserShift (int idUser, int idShift, Date date){
-        //UserShift newUserShift = new UserShift();
-        //newUserShift.setUser(usersList.get(idUser - 1));
-        //newUserShift.setShift(shiftsList.get(idShift - 1));
-        //newUserShift.setDate(date);
 
         userShiftsList.add(new UserShift(
                 usersList.get(idUser - 1),
