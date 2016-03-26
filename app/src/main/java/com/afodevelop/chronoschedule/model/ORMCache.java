@@ -6,6 +6,8 @@ import com.afodevelop.chronoschedule.model.UserShift;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by alex on 14/03/16.
@@ -13,59 +15,65 @@ import java.util.ArrayList;
 public class ORMCache {
 
     // CLASS-WIDE VARIABLES
-    private ArrayList<User> usersList;
-    private ArrayList<Shift> shiftsList;
+    private LinkedHashMap<Integer,User> usersMap;
+    private LinkedHashMap<Integer,Shift> shiftsMap;
     private ArrayList<UserShift> userShiftsList;
 
     // CONSTANTS
 
     // CONSTRUCTOR
     public ORMCache(){
-        usersList = new ArrayList<>();
-        shiftsList = new ArrayList<>();
+        usersMap = new LinkedHashMap<>();
+        shiftsMap = new LinkedHashMap<>();
         userShiftsList = new ArrayList<>();
     }
 
     // LOGIC
     public void addUser (User newUser){
-        usersList.add(newUser);
+        usersMap.put(newUser.getIdUser(), newUser);
     }
 
     public void setUsersList (ArrayList<User> users){
-        usersList = users;
+        usersMap.clear();
+        for (User u: users){
+            usersMap.put(u.getIdUser(),u);
+        }
     }
 
     public void delUser (int idUser){
-        usersList.remove(idUser);
+        usersMap.remove(idUser);
     }
 
     public void clearUsers (){
         userShiftsList.clear();
-        usersList.clear();
+        usersMap.clear();
     }
 
     public void addShift (Shift newShift){
-        shiftsList.add(newShift);
+        shiftsMap.put(newShift.getIdShift(), newShift);
     }
 
     public void setShiftsList (ArrayList<Shift> shifts){
-        shiftsList = shifts;
+        shiftsMap.clear();
+        for(Shift s: shifts){
+            shiftsMap.put(s.getIdShift(),s);
+        }
     }
 
     public void delShift (int idShift){
-        shiftsList.remove(idShift);
+        shiftsMap.remove(idShift);
     }
 
     public void clearShifts (){
         userShiftsList.clear();
-        shiftsList.clear();
+        shiftsMap.clear();
     }
 
     public void addUserShift (int idUser, int idShift, Date date){
 
         userShiftsList.add(new UserShift(
-                usersList.get(idUser - 1),
-                shiftsList.get(idShift - 1),
+                usersMap.get(idUser),
+                shiftsMap.get(idShift),
                 date
         ));
     }
@@ -76,16 +84,16 @@ public class ORMCache {
 
     public void clear(){
         userShiftsList.clear();
-        usersList.clear();
-        shiftsList.clear();
+        usersMap.clear();
+        shiftsMap.clear();
     }
 
     public ArrayList<User> getUsersList() {
-        return usersList;
+        return new ArrayList<>(usersMap.values());
     }
 
     public ArrayList<Shift> getShiftsList() {
-        return shiftsList;
+        return new ArrayList<>(shiftsMap.values());
     }
 
     public ArrayList<UserShift> getUserShiftsList() {
