@@ -25,13 +25,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLConnectorFactory;
 import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
-import com.afodevelop.chronoschedule.controllers.ormControllers.OrmException;
+import com.afodevelop.chronoschedule.model.OrmException;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.SQLException;

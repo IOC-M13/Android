@@ -21,7 +21,7 @@ import com.afodevelop.chronoschedule.controllers.activities.DayFormActivity;
 import com.afodevelop.chronoschedule.controllers.activities.MainActivity;
 import com.afodevelop.chronoschedule.controllers.activities.UserFormActivity;
 import com.afodevelop.chronoschedule.controllers.adapters.ShiftsLegendListAdapter;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.User;
 import com.imanoweb.calendarview.CalendarListener;
 import com.imanoweb.calendarview.CustomCalendarView;
@@ -203,9 +203,9 @@ public class CalendarFragment extends Fragment {
     public void refreshData(){
         try {
             Log.d("calendarFragment","refreshing data");
-            userNames = mainActivity.getUserNames();
+            userNames = mainActivity.getSqLiteAssistant().getUserNames();
             shiftNames = mainActivity.getSqLiteAssistant().getShiftNames();
-            shiftColors = mainActivity.getShiftColors();
+            shiftColors = mainActivity.getSqLiteAssistant().getShiftColors();
             if (spinnerAdapter != null) {
                 setupSpinner();
             }
@@ -285,7 +285,7 @@ public class CalendarFragment extends Fragment {
         Date dayDate = cell.getDate();
         String result;
         try {
-            result = mainActivity.getShiftColor(calendarUser, dayDate);
+            result = mainActivity.getSqLiteAssistant().getShiftColor(calendarUser, dayDate);
             if (result == null){
                 filledDays.put(dayDate, false);
             } else {

@@ -21,10 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 import com.afodevelop.chronoschedule.model.UserShift;
@@ -34,7 +34,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 
 public class DayFormActivity extends AppCompatActivity {

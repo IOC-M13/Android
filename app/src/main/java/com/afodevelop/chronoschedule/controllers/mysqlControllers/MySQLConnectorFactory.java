@@ -2,6 +2,8 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
+import com.afodevelop.chronoschedule.model.JdbcException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

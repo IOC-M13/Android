@@ -15,28 +15,36 @@ import android.widget.TextView;
 
 import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.activities.ShiftFormActivity;
+import com.afodevelop.chronoschedule.controllers.fragments.ShiftsFragment;
+import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
+import com.afodevelop.chronoschedule.model.Shift;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 /**
  * Created by alex on 10/03/16.
  */
-public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
+public class ShiftsListArrayAdapter extends ArrayAdapter<Shift> {
 
+    // CLASS-WIDE VARIABLES
     Context context;
-    int layoutResourceId;
-    String user;
-    ArrayList<String> data = new ArrayList<String>();
+    ShiftsFragment parentFragment;
+    int layoutResourceId, shiftId;
+    String shiftName;
+    ArrayList<Shift> data = new ArrayList<>();
 
-
+    // CONSTRUCTOR
     public ShiftsListArrayAdapter(Context context, int layoutResourceId,
-                                  ArrayList<String> data) {
+                                  ArrayList<Shift> data, ShiftsFragment parentFragment) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.data = data;
+        this.parentFragment = parentFragment;
     }
 
+    // LOGIC
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = convertView;
@@ -54,45 +62,21 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
             holder = (UserHolder) row.getTag();
         }
 
-        user = data.get(position);
-        holder.itemName.setText(user);
+        shiftId = data.get(position).getIdShift();
+        shiftName = data.get(position).getName();
 
+        holder.itemName.setText(shiftName);
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                Intent i = new Intent(context, ShiftFormActivity.class);
-                Bundle extras = new Bundle();
-                extras.putBoolean("isNew", false);
-                extras.putString("user", user);
-                i.putExtras(extras);
-                context.startActivity(i);
-
+                parentFragment.editShift(shiftId);
             }
         });
 
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
-                AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(context);
-                myAlertDialog.setTitle("DELETE WARNING!");
-                myAlertDialog.setMessage("Please confirm deletion of item");
-                myAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        // do something when the OK button is clicked
-                    }});
-                myAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        // do something when the Cancel button is clicked
-                    }});
-                myAlertDialog.show();
-
-
+                parentFragment.deleteShift(shiftId);
             }
         });
 
@@ -104,6 +88,4 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
         ImageButton btnEdit;
         TextView itemName;
     }
-
-
 }

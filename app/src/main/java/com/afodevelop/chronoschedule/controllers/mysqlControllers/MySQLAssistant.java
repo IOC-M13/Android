@@ -2,6 +2,7 @@ package com.afodevelop.chronoschedule.controllers.mysqlControllers;
 
 import android.util.Log;
 
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.model.ORMCache;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
@@ -35,6 +36,10 @@ public class MySQLAssistant {
     private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
     private static final String SHIFT_INSERT = "INSERT INTO Shifts " +
             "(name, startTime, endTime, color) VALUES (?, ?, ?, ?)";
+    private static final String SHIFT_UPDATE = "UPDATE Shifts SET " +
+            "name = ?, startTime = ?, endTime = ?, color = ? " +
+            "WHERE idShift = ?;";
+    private static final String SHIFT_DELETE = "DELETE FROM Shifts WHERE idShift = ?;";
 
     private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
     private static final String USERSHIFT_INSERT = "INSERT INTO UserShifts " +
@@ -330,6 +335,61 @@ public class MySQLAssistant {
         preparedStmt.setInt(1, s.getShift().getIdShift());
         preparedStmt.setInt(2, s.getuser().getIdUser());
         preparedStmt.setDate(3, s.getDate());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
+
+    /**
+     *
+     * @param newShift
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void insertShift(Shift newShift) throws JdbcException, SQLException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(SHIFT_INSERT);
+        preparedStmt.setString(1, newShift.getName());
+        preparedStmt.setTime(2, java.sql.Time.valueOf(newShift.getStartTime()));
+        preparedStmt.setTime(3, java.sql.Time.valueOf(newShift.getEndTime()));
+        preparedStmt.setString(4, newShift.getColor());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
+
+    /**
+     *
+     * @param targetShift
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void deleteShift(Shift targetShift) throws JdbcException, SQLException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(SHIFT_DELETE);
+        preparedStmt.setInt(1, targetShift.getIdShift());
+        // execute the java preparedstatement
+        preparedStmt.executeUpdate();
+        closeConnection();
+    }
+
+    /**
+     *
+     * @param targetShift
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    public void updateShift(Shift targetShift) throws JdbcException, SQLException, ClassNotFoundException {
+        openConnection();
+        PreparedStatement preparedStmt = mySQLConnection.prepareStatement(SHIFT_UPDATE);
+        preparedStmt.setString(1, targetShift.getName());
+        preparedStmt.setTime(2, java.sql.Time.valueOf(targetShift.getStartTime()));
+        preparedStmt.setTime(3, java.sql.Time.valueOf(targetShift.getEndTime()));
+        preparedStmt.setString(4, targetShift.getColor());
+        preparedStmt.setInt(5, targetShift.getIdShift());
         // execute the java preparedstatement
         preparedStmt.executeUpdate();
         closeConnection();

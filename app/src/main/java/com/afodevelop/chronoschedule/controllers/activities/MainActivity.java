@@ -22,20 +22,16 @@ import com.afodevelop.chronoschedule.controllers.adapters.TabPagerAdapter;
 import com.afodevelop.chronoschedule.controllers.fragments.CalendarFragment;
 import com.afodevelop.chronoschedule.controllers.fragments.ShiftsFragment;
 import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
-import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
-import com.afodevelop.chronoschedule.controllers.ormControllers.OrmException;
+import com.afodevelop.chronoschedule.model.OrmException;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
-import com.afodevelop.chronoschedule.model.UserShift;
 
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -331,6 +327,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("refreshFragments", "refresh shifts fragment");
                 ShiftsFragment shiftsFragment = (ShiftsFragment) tabPagerAdapter.
                         getfragments(2);
+                shiftsFragment.refreshData();
+                calendarFragment.refreshData();
                 break;
         }
     }
@@ -378,26 +376,6 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(jdbcStatusUpdateReceiver, filter);
     }
 
-
-    /**
-     * This method builds an array of strings with all usernames in DB
-     * @return String full fith username strings
-     * @throws SQLiteException
-     */
-    public String[] getUserNames() throws SQLiteException {
-        ArrayList<User> users = sqLiteAssistant.getAllUsers();
-        if (!users.isEmpty()) {
-            String[] result = new String[users.size()];
-            for (int i = 0; i < users.size(); i++) {
-                result[i] = users.get(i).getUserName();
-            }
-            return result;
-        } else {
-            return null;
-        }
-    }
-
-
     /**
      * This method calls for user deletion on DB. Target user is passed as argument
      * @param user User to be deleted
@@ -413,39 +391,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * This method builds an array of strings with all shift colors in DB
-     * @return
+     * This method calls for Shift deletion on DB. Target shift is passed as argument
+     * @param shiftId Shift to be deleted
+     * @throws JdbcException
+     * @throws SQLException
+     * @throws ClassNotFoundException
      * @throws SQLiteException
      */
-    public String[] getShiftColors() throws SQLiteException {
-        ArrayList<Shift> shifts = sqLiteAssistant.getAllShifts();
-        if (!shifts.isEmpty()) {
-            String[] result = new String[shifts.size()];
-            for (int i = 0; i < shifts.size(); i++) {
-                result[i] = shifts.get(i).getColor();
-            }
-            return result;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * This method retrieves the color of an user work day by means of
-     * asigned shift to him/her. The method needs the User object and the date.
-     * @param u User to which query the calendar
-     * @param d Date at which Shift color has to be queried.
-     * @return
-     * @throws SQLiteException
-     * @throws ParseException
-     */
-    public String getShiftColor(User u, Date d) throws SQLiteException, ParseException {
-        UserShift userShift = sqLiteAssistant.getUserShift(u, d);
-        if (userShift != null) {
-            return userShift.getShift().getColor();
-        } else {
-            return null;
-        }
+    public void deleteShift(int shiftId) throws JdbcException, SQLException,
+            ClassNotFoundException, SQLiteException {
+        Shift targetShift = sqLiteAssistant.getShiftById(shiftId);
+        mySQLAssistant.deleteShift(targetShift);
     }
 
     /**

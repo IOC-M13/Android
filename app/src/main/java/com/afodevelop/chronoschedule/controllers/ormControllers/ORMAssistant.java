@@ -2,10 +2,11 @@ package com.afodevelop.chronoschedule.controllers.ormControllers;
 
 import android.util.Log;
 
-import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.OrmException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.ORMCache;
 
 import java.sql.SQLException;

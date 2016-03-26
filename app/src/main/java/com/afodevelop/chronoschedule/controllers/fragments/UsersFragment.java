@@ -18,8 +18,8 @@ import com.afodevelop.chronoschedule.R;
 import com.afodevelop.chronoschedule.controllers.activities.MainActivity;
 import com.afodevelop.chronoschedule.controllers.activities.UserFormActivity;
 import com.afodevelop.chronoschedule.controllers.adapters.UsersListArrayAdapter;
-import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.JdbcException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -130,7 +130,7 @@ public class UsersFragment extends Fragment {
             Log.d("usersFragment", "connectivity is :" + connectivity);
             userNames.clear();
 
-            for (String userName: mainActivity.getUserNames()){
+            for (String userName: mainActivity.getSqLiteAssistant().getUserNames()){
                 userNames.add(userName);
             }
 
@@ -174,6 +174,11 @@ public class UsersFragment extends Fragment {
 
     }
 
+    /**
+     * This method prepares and launches the userForm activity to edit a user
+     * whose userName is passed as string param
+     * @param user a String with the username of user to be edited
+     */
     public void editUser(String user){
         Intent i = new Intent(getActivity(), UserFormActivity.class);
         Bundle extras = new Bundle();
@@ -184,11 +189,10 @@ public class UsersFragment extends Fragment {
     }
 
     /**
-     * An auxiliare method to ease Toast printing
+     * An auxiliar method to ease Toast printing
      * @param s
      */
     private void printToast(String s){
         Toast.makeText(mainActivity, s, Toast.LENGTH_SHORT).show();
     }
-
 }

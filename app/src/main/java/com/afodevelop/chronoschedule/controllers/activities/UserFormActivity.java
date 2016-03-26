@@ -19,10 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.controllers.mysqlControllers.JdbcException;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
-import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteException;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.SQLException;
@@ -232,7 +232,7 @@ public class UserFormActivity extends AppCompatActivity {
     }
 
     /**
-     * Instatniate all dynamically altered Views. The method receives a boolean to
+     * Instantiate all dynamically altered Views. The method receives a boolean to
      * indicate either userName editable or not.
      * @param userNameEditable
      */
@@ -369,7 +369,7 @@ public class UserFormActivity extends AppCompatActivity {
     }
 
     /**
-     * An auxiliare method to ease Toast printing
+     * An auxiliar method to ease Toast printing
      * @param s
      */
     private void printToast(String s){

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.afodevelop.chronoschedule.model.ORMCache;
+import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 import com.afodevelop.chronoschedule.model.UserShift;
@@ -481,6 +482,60 @@ public class SQLiteAssistant {
             String[] result = new String[shifts.size()];
             for (int i = 0; i < shifts.size(); i++) {
                 result[i] = shifts.get(i).getName();
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * This method builds an array of strings with all shift colors in DB
+     * @return
+     * @throws SQLiteException
+     */
+    public String[] getShiftColors() throws SQLiteException {
+        ArrayList<Shift> shifts = getAllShifts();
+        if (!shifts.isEmpty()) {
+            String[] result = new String[shifts.size()];
+            for (int i = 0; i < shifts.size(); i++) {
+                result[i] = shifts.get(i).getColor();
+            }
+            return result;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * This method retrieves the color of an user work day by means of
+     * asigned shift to him/her. The method needs the User object and the date.
+     * @param u User to which query the calendar
+     * @param d Date at which Shift color has to be queried.
+     * @return
+     * @throws SQLiteException
+     * @throws ParseException
+     */
+    public String getShiftColor(User u, Date d) throws SQLiteException, ParseException {
+        UserShift userShift = getUserShift(u, d);
+        if (userShift != null) {
+            return userShift.getShift().getColor();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * This method builds an array of strings with all usernames in DB
+     * @return String full fith username strings
+     * @throws SQLiteException
+     */
+    public String[] getUserNames() throws SQLiteException {
+        ArrayList<User> users = getAllUsers();
+        if (!users.isEmpty()) {
+            String[] result = new String[users.size()];
+            for (int i = 0; i < users.size(); i++) {
+                result[i] = users.get(i).getUserName();
             }
             return result;
         } else {
