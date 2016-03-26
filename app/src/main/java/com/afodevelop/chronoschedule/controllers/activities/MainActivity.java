@@ -328,7 +328,6 @@ public class MainActivity extends AppCompatActivity {
                 ShiftsFragment shiftsFragment = (ShiftsFragment) tabPagerAdapter.
                         getfragments(2);
                 shiftsFragment.refreshData();
-                calendarFragment.refreshData();
                 break;
         }
     }

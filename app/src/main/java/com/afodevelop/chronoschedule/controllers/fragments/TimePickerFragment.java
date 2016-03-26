@@ -37,8 +37,6 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         return f;
     }
 
-
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
         //Use the current time as the default values for the time picker
@@ -73,27 +71,21 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         //Get reference of host activity (XML Layout File) TextView widget
         int id = getResources().getIdentifier(targetView, "id", getActivity().getPackageName());
         TextView tv = (TextView) getActivity().findViewById(id);
-        //Set a message for user
 
-        //Get the AM or PM for current time
-        String aMpM = "AM";
-        if(hourOfDay >11)
-        {
-            aMpM = "PM";
+        String hour, minutes;
+
+        if(hourOfDay < 10){
+            hour = "0" + String.valueOf(hourOfDay);
+        } else {
+            hour = String.valueOf(hourOfDay);
         }
 
-        //Make the 24 hour time format to 12 hour time format
-        int currentHour;
-        if(hourOfDay>11)
-        {
-            currentHour = hourOfDay - 12;
-        }
-        else
-        {
-            currentHour = hourOfDay;
+        if(minute < 10){
+            minutes = "0" + String.valueOf(minute);
+        }else{
+            minutes = String.valueOf(minute);
         }
 
-        tv.setText(String.valueOf(currentHour) + " : " + String.valueOf(minute) + " " + aMpM );
-
+        tv.setText(hour + ":" + minutes + ":00");
     }
 }

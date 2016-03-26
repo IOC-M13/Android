@@ -136,7 +136,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
     private EditText shiftNameTextEdit;
     private FloatingActionButton saveButton;
 
-    private String mode;
+    private String mode, pickedColor;
     private Shift shift;
     private boolean connectivity;
     private boolean checkConnectivity;
@@ -177,8 +177,10 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
         startTimeTextView.setText("--:-- XX");
         endTimeButton.setText("SET TIME");
         endTimeTextView.setText("--:-- XX");
-        pickColorButton.setBackgroundColor(Color.parseColor("#888888"));
-        pickColorButton.setText("#888888");
+        pickedColor = "#888888";
+        pickColorButton.setBackgroundColor(Color.parseColor(pickedColor));
+        pickColorButton.setText(pickedColor);
+
     }
 
     /**
@@ -199,8 +201,9 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
             startTimeTextView.setText(shift.getStartTime());
             endTimeButton.setText("EDIT TIME");
             endTimeTextView.setText(shift.getEndTime());
-            pickColorButton.setBackgroundColor(Color.parseColor("#" + shift.getColor()));
-            pickColorButton.setText("#" + shift.getColor());
+            pickedColor = "#" + shift.getColor();
+            pickColorButton.setBackgroundColor(Color.parseColor(pickedColor));
+            pickColorButton.setText(pickedColor);
         } catch (SQLiteException e) {
             printToast("Error accessing DB.");
             e.printStackTrace();
@@ -244,7 +247,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
             }
         });
 
-        saveButton = (FloatingActionButton) findViewById(R.id.edit_user_savebutton);
+        saveButton = (FloatingActionButton) findViewById(R.id.edit_shift_savebutton);
         updateButton(true);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,6 +287,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
                 // shown when clicking on the icon in the action bar.
                 pickColorButton.setBackgroundColor(color);
                 pickColorButton.setText(String.format("#%06X", 0xFFFFFF & color));
+                pickedColor = String.format("%06X", 0xFFFFFF & color);
+                printToast("New picked color: " + pickedColor);
                 break;
         }
     }
@@ -323,7 +328,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
             shift.setName(shiftNameTextEdit.getText().toString());
             shift.setStartTime(startTimeTextView.getText().toString());
             shift.setEndTime(endTimeTextView.getText().toString());
-            shift.setColor(pickColorButton.getText().toString());
+            shift.setColor(pickedColor);
             UpdateShiftTask updateShiftTask = new UpdateShiftTask();
             updateShiftTask.execute();
         } else {
@@ -331,7 +336,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
                     shiftNameTextEdit.getText().toString(),
                     startTimeTextView.getText().toString(),
                     endTimeTextView.getText().toString(),
-                    pickColorButton.getText().toString());
+                    pickedColor);
             CreateShiftTask createShiftTask = new CreateShiftTask();
             createShiftTask.execute();
         }

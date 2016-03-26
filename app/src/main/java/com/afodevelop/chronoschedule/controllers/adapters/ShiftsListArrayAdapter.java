@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,18 +26,18 @@ import java.util.LinkedHashMap;
 /**
  * Created by alex on 10/03/16.
  */
-public class ShiftsListArrayAdapter extends ArrayAdapter<Shift> {
+public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
 
     // CLASS-WIDE VARIABLES
     Context context;
     ShiftsFragment parentFragment;
-    int layoutResourceId, shiftId;
+    int layoutResourceId;
     String shiftName;
-    ArrayList<Shift> data = new ArrayList<>();
+    ArrayList<String> data = new ArrayList<String>();
 
     // CONSTRUCTOR
     public ShiftsListArrayAdapter(Context context, int layoutResourceId,
-                                  ArrayList<Shift> data, ShiftsFragment parentFragment) {
+                                  ArrayList<String> data, ShiftsFragment parentFragment) {
         super(context, layoutResourceId, data);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
@@ -46,9 +47,10 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<Shift> {
 
     // LOGIC
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, final ViewGroup parent) {
         View row = convertView;
         UserHolder holder = null;
+        final int pos = position;
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -62,21 +64,24 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<Shift> {
             holder = (UserHolder) row.getTag();
         }
 
-        shiftId = data.get(position).getIdShift();
-        shiftName = data.get(position).getName();
+        shiftName = data.get(position);
 
         holder.itemName.setText(shiftName);
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
+            final int shiftPosition = pos;
             @Override
             public void onClick(View v) {
-                parentFragment.editShift(shiftId);
+                Log.d("ShitfsArrayAdapter", "click btnEdit at row " + shiftPosition);
+                parentFragment.editShift(shiftPosition);
             }
         });
 
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            final int shiftPosition = pos;
             @Override
             public void onClick(View v) {
-                parentFragment.deleteShift(shiftId);
+                Log.d("ShitfsArrayAdapter", "click btnDelete at row " + shiftPosition);
+                parentFragment.deleteShift(shiftPosition);
             }
         });
 

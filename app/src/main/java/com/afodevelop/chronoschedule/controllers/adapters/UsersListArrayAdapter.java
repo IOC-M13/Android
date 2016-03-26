@@ -2,6 +2,7 @@ package com.afodevelop.chronoschedule.controllers.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
     UsersFragment parentFragment;
     int layoutResourceId;
     String user;
-    ArrayList<String> data = new ArrayList<String>();
+    ArrayList<String> data = new ArrayList<>();
 
     // CONSTRUCTOR
     public UsersListArrayAdapter(Context context, int layoutResourceId,
@@ -41,6 +42,7 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, final ViewGroup parent) {
         View row = convertView;
         UserHolder holder = null;
+        final int pos = position;
 
         if (row == null) {
             LayoutInflater inflater = ((Activity) context).getLayoutInflater();
@@ -55,18 +57,24 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
         }
 
         user = data.get(position);
-        holder.itemName.setText(user);
 
+        holder.itemName.setText(user);
         holder.btnEdit.setOnClickListener(new View.OnClickListener() {
+            final int userPosition = pos;
+            final String userName = data.get(pos);
             @Override
             public void onClick(View v) {
-                parentFragment.editUser(user);
+                Log.d("UsersArrayAdapter", "click btnEdit at row " + userPosition);
+                parentFragment.editUser(userName);
             }
         });
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            final int userPosition = pos;
+            final String userName = data.get(pos);
             @Override
             public void onClick(View v) {
-                parentFragment.deleteUser(user);
+                Log.d("UsersArrayAdapter", "click btnDelete at row " + userPosition);
+                parentFragment.deleteUser(userName);
             }
         });
 

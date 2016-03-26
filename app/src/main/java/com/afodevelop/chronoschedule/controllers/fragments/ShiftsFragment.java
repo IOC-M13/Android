@@ -24,6 +24,7 @@ import com.afodevelop.chronoschedule.model.Shift;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by alex on 3/03/16.
@@ -75,7 +76,8 @@ public class ShiftsFragment extends Fragment {
     private ListView listView;
     private ShiftsListArrayAdapter arrayAdapter;
     private FloatingActionButton addShiftButton;
-    private ArrayList<Shift> shifts;
+    private HashMap<Integer, Integer> shiftsPositionIDMap;
+    private ArrayList<String> shifts;
     private boolean connectivity;
 
     // LOGIC
@@ -89,6 +91,7 @@ public class ShiftsFragment extends Fragment {
 
         // Initialize early values
         shifts = new ArrayList<>();
+        shiftsPositionIDMap = new HashMap<>();
 
         listView = (ListView) myFragmentView.findViewById(R.id.shifts_list);
         arrayAdapter = new ShiftsListArrayAdapter(getActivity(), R.layout.users_shifts_listview, shifts, ShiftsFragment.this);
@@ -131,7 +134,16 @@ public class ShiftsFragment extends Fragment {
             connectivity = mainActivity.hasConnectivty();
             Log.d("ShiftsFragment", "connectivity is :" + connectivity);
             shifts.clear();
-            shifts = mainActivity.getSqLiteAssistant().getAllShifts();
+            shiftsPositionIDMap.clear();
+            ArrayList<Shift> tmp = mainActivity.getSqLiteAssistant().getAllShifts();
+            Log.d("ShiftsFragment", "Retrieved " + tmp.size() + " shifts from DB");
+            int i = 0;
+            for (Shift s: tmp){
+                shifts.add(s.getName());
+                shiftsPositionIDMap.put(i, s.getIdShift());
+                Log.d("ShiftsFragment", "mapping position " + i + " to ID " + s.getIdShift());
+                i++;
+            }
 
             listView.invalidateViews();
             arrayAdapter.notifyDataSetChanged();
@@ -146,17 +158,18 @@ public class ShiftsFragment extends Fragment {
      * Call delete shift in our MySQLAssistant. we got the shiftId passed as
      * argument. So we first get the target shift, and then pass it to
      * MySQLAssistant delete method
-     * @param shiftId
+     * @param position
      */
-    public void deleteShift(final int shiftId){
+    public void deleteShift(final int position){
         if (connectivity) {
-
+            Log.d("shiftsfragment", "asked to edit position: " + position);
+            Log.d("shitfsfragment", "position maps to ID; " + shiftsPositionIDMap.get(position));
             AlertDialog.Builder myAlertDialog = new AlertDialog.Builder(getActivity());
             myAlertDialog.setTitle("DELETE WARNING!");
             myAlertDialog.setMessage("Please confirm deletion of item");
             myAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
-                    DeleteShiftTask deleteShiftTask = new DeleteShiftTask(shiftId);
+                    DeleteShiftTask deleteShiftTask = new DeleteShiftTask(shiftsPositionIDMap.get(position));
                     deleteShiftTask.execute();
                 }
             });
@@ -176,13 +189,15 @@ public class ShiftsFragment extends Fragment {
     /**
      * This method prepares and launches the shiftForm activity to edit a shift
      * whose shift ID is passed as integer param
-     * @param shiftId an nteger with the ID of shift to be edited
+     * @param position an nteger with the ID of shift to be edited
      */
-    public void editShift(int shiftId){
+    public void editShift(int position){
+        Log.d("shiftsfragment", "asked to edit position: " + position);
+        Log.d("shitfsfragment", "position maps to ID; " + shiftsPositionIDMap.get(position));
         Intent i = new Intent(getActivity(), ShiftFormActivity.class);
         Bundle extras = new Bundle();
         extras.putString("mode", "edit");
-        extras.putInt("shiftId", shiftId);
+        extras.putInt("shiftId", shiftsPositionIDMap.get(position));
         i.putExtras(extras);
         startActivity(i);
     }

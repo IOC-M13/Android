@@ -167,7 +167,7 @@
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/confirm_dayshift_button"
+        android:id="@+id/edit_shift_savebutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
