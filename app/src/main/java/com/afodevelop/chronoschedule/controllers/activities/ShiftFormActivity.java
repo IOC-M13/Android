@@ -1,8 +1,6 @@
 package com.afodevelop.chronoschedule.controllers.activities;
 
-import android.app.AlarmManager;
 import android.app.DialogFragment;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,12 +24,17 @@ import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssista
 import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.Shift;
-import com.afodevelop.chronoschedule.model.User;
 import com.github.danielnilsson9.colorpickerview.dialog.ColorPickerDialogFragment;
 import com.github.danielnilsson9.colorpickerview.dialog.ColorPickerDialogFragment.ColorPickerDialogListener;
 
 import java.sql.SQLException;
 
+/**
+ * This class holds a form to either create, edit or show Shift data information.
+ * It acts basically as a form holder.
+ *
+ * @author Alejandro Olivan Alvarez
+ */
 public class ShiftFormActivity extends AppCompatActivity implements ColorPickerDialogListener{
 
     // COSTANTS
@@ -42,6 +45,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
      * This class is a broadcast reciver. It handles what happens as our
      * activity receives periodically an alarm event: It will trigger a
      * connectivity check!
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
@@ -56,6 +61,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * This class is an AsyncTask based task that performs a connectivity check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class CheckConnectivityTask extends AsyncTask<Void, Void, Void> {
 
@@ -70,6 +77,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class UpdateShiftTask extends AsyncTask<Void, Void, Void>{
 
@@ -98,6 +107,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class CreateShiftTask extends AsyncTask<Void, Void, Void>{
 
@@ -127,21 +138,25 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
     // CLASSWIDE VARIABLES
     private SQLiteAssistant sqLiteAssistant;
     private MySQLAssistant mySQLAssistant;
-    private AlarmManager alarmManager;
-    private PendingIntent alarmPendingIntent;
     private JdbcStatusUpdateReceiver jdbcStatusUpdateReceiver;
-
     private Button startTimeButton, endTimeButton, pickColorButton;
     private TextView startTimeTextView, endTimeTextView;
     private EditText shiftNameTextEdit;
     private FloatingActionButton saveButton;
-
     private String mode, pickedColor;
     private Shift shift;
     private boolean connectivity;
     private boolean checkConnectivity;
     private boolean isUpdate;
 
+    // LOGIC
+    /**
+     * The onCreate method override is fairly simple, it initializes classwide variables
+     * and switches logic flow upon Intent data evaluation
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,6 +178,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * Handle here logic for new shift activity logic flow
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void newModeLogic(){
         setTitle("Create Shift");
@@ -174,9 +191,9 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
         renderUI();
         shiftNameTextEdit.setText("");
         startTimeButton.setText("SET TIME");
-        startTimeTextView.setText("--:-- XX");
+        startTimeTextView.setText("--:--:--");
         endTimeButton.setText("SET TIME");
-        endTimeTextView.setText("--:-- XX");
+        endTimeTextView.setText("--:--:--");
         pickedColor = "#888888";
         pickColorButton.setBackgroundColor(Color.parseColor(pickedColor));
         pickColorButton.setText(pickedColor);
@@ -185,9 +202,11 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * Handle here logic for edit shift activity logic flow
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void editModeLogic(){
-        setTitle("Edit User");
+        setTitle("Edit Shift");
         isUpdate = true;
         checkConnectivity = true;
         CheckConnectivityTask checkConnectivity = new CheckConnectivityTask();
@@ -213,6 +232,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * Instantiate all dynamically altered Views.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void renderUI(){
 
@@ -259,23 +280,22 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * Opens a dialog with a color picker to choose a color
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void onClickColorPickerDialog() {
-
-        // The color picker menu item has been clicked. Show
-        // a dialog using the custom ColorPickerDialogFragment class.
-
         ColorPickerDialogFragment f = ColorPickerDialogFragment
                 .newInstance(DIALOG_ID, null, null, Color.BLACK, true);
 
         f.setStyle(DialogFragment.STYLE_NORMAL, R.style.LightPickerDialogTheme);
         f.show(getFragmentManager(), "d");
-
     }
 
     /**
      * This method catches a user color picker selection and captures the
      * selected color value
+     *
+     * @author Alejandro Olivan Alvarez
      * @param dialogId This param identifies the dialog instance
      * @param color The color actually selectedd by user
      */
@@ -283,8 +303,6 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
     public void onColorSelected(int dialogId, int color) {
         switch (dialogId) {
             case DIALOG_ID:
-                // We got result from the other dialog, the one that is
-                // shown when clicking on the icon in the action bar.
                 pickColorButton.setBackgroundColor(color);
                 pickColorButton.setText(String.format("#%06X", 0xFFFFFF & color));
                 pickedColor = String.format("%06X", 0xFFFFFF & color);
@@ -295,17 +313,19 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * A mandatory override for Dialog
+     *
+     * @author Alejandro Olivan Alvarez
      * @param dialogId
      */
     @Override
-    public void onDialogDismissed(int dialogId) {
-
-    }
+    public void onDialogDismissed(int dialogId) {}
 
     /**
      * This method enables to dynamically enable/show disable/hide the save button
      * So, basing on connectivity status, the button is controlled.
-     * @param enable
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param enable a boolean to indicate if updateButton should be rendered
      */
     private void updateButton(boolean enable){
         if (enable){
@@ -322,6 +342,8 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
     /**
      * This method triggers the final sentences against DB to persist the new user
      * Or to persist current user changes.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void saveShift(){
         if (isUpdate){
@@ -346,7 +368,9 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
     /**
      * This method actually asks out MySQL JDBC assistant to check for
      * available connectivity.
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a booleant true (if we got connectivity) or false (if not)
      */
     private boolean checkConnectivity(){
         try {
@@ -362,16 +386,10 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
      * This method is responsable of instantiate, initialize and start both an
      * AlrManager driven periodic broadcasting event, and an broadcast listener that,
      * on receiving the advise, trigges connectivity status check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void initializeConnectivityWatchDog(){
-        Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
-        alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        long now = System.currentTimeMillis();
-        long interval = 1 * 60 * 1000;
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
-                alarmPendingIntent);
-
         IntentFilter filter = new IntentFilter("com.afodevelop.chronoschedule.MY_TIMER");
         jdbcStatusUpdateReceiver = new JdbcStatusUpdateReceiver();
         registerReceiver(jdbcStatusUpdateReceiver, filter);
@@ -379,20 +397,23 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
 
     /**
      * Handle AlarmDeactivation and Broadcast receiver de-activation before leaving
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     protected void onStop() {
         super.onStop();
         if (checkConnectivity) {
             unregisterReceiver(jdbcStatusUpdateReceiver);
-            alarmManager.cancel(alarmPendingIntent);
         }
     }
 
 
     /**
      * An auxiliar method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s the string we want to appear inside the toast
      */
     private void printToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();

@@ -1,7 +1,5 @@
 package com.afodevelop.chronoschedule.controllers.activities;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -21,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
@@ -36,6 +34,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+/**
+ * An activity class that handles the login process
+ *
+ * @author Alejandro Olivan Alvarez
+ */
 public class DayFormActivity extends AppCompatActivity {
 
     // INTERNAL CLASS DEFINITIONS
@@ -43,6 +46,8 @@ public class DayFormActivity extends AppCompatActivity {
      * This class is a broadcast reciver. It handles what happens as our
      * activity receives periodically an alarm event: It will trigger a
      * connectivity check!
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
@@ -57,6 +62,8 @@ public class DayFormActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a connectivity check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class CheckConnectivityTask extends AsyncTask<Void, Void, Void> {
 
@@ -71,6 +78,8 @@ public class DayFormActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class UpdateUserShiftTask extends AsyncTask<Void, Void, Void>{
 
@@ -128,6 +137,8 @@ public class DayFormActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class DeleteUserShiftTask extends AsyncTask<Void, Void, Void>{
 
@@ -157,16 +168,12 @@ public class DayFormActivity extends AppCompatActivity {
     // CLASSWIDE VARIABLES
     private SQLiteAssistant sqLiteAssistant;
     private MySQLAssistant mySQLAssistant;
-    private AlarmManager alarmManager;
-    private PendingIntent alarmPendingIntent;
     private JdbcStatusUpdateReceiver jdbcStatusUpdateReceiver;
-
     private TextView dateTextView, userTextView;
     private TextView spinnerLabelTextView, startTimeTextView, endTimeTextView;
     private Spinner chooseUserSpinner;
     private LinearLayout startTimeLayout, endTimeLayout;
     private FloatingActionButton saveButton;
-
     private DateFormat df;
     private Date date;
     private String mode, strDate;
@@ -181,7 +188,12 @@ public class DayFormActivity extends AppCompatActivity {
 
 
     // LOGIC
-
+    /**
+     * The overriden onCreate method
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -223,6 +235,8 @@ public class DayFormActivity extends AppCompatActivity {
 
     /**
      * A method that prepares the class environment to act as a "new/creation" mode.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void newModeLogic(){
         setTitle("Add day shift");
@@ -252,6 +266,8 @@ public class DayFormActivity extends AppCompatActivity {
 
     /**
      * A method that prepares the class environemnt to act as "edit" mode.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void editModeLogic(){
         setTitle("Edit day shift");
@@ -281,6 +297,8 @@ public class DayFormActivity extends AppCompatActivity {
 
     /**
      * A method that sets the class environment for just "show" mode.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void showModeLogic(){
         setTitle("Day shift");
@@ -309,6 +327,8 @@ public class DayFormActivity extends AppCompatActivity {
      * This method renders all UI artifacts taking into account envirnment variables
      * previously set up, and also a pair of conditionals received as boolean
      * parameters
+     *
+     * @author Alejandro Olivan Alvarez
      * @param shiftEditable A boolean to set if shifts spinner is rendered
      * @param saveable A boolean to set if save button is rendered
      */
@@ -383,7 +403,9 @@ public class DayFormActivity extends AppCompatActivity {
     /**
      * This method actually asks out MySQL JDBC assistant to check for
      * available connectivity.
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean with ether true (coonectivity OK) or false
      */
     private boolean checkConnectivity(){
         try {
@@ -399,16 +421,11 @@ public class DayFormActivity extends AppCompatActivity {
      * This method is responsable of instantiate, initialize and start both an
      * AlrManager driven periodic broadcasting event, and an broadcast listener that,
      * on receiving the advise, trigges connectivity status check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void initializeConnectivityWatchDog(){
         Log.d("DayFormActivity","Initialize connectivity watchdog.");
-        Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
-        alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        long now = System.currentTimeMillis();
-        long interval = 1 * 60 * 1000; // 1 hour
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
-                alarmPendingIntent);
 
         IntentFilter filter = new IntentFilter("com.afodevelop.chronoschedule.MY_TIMER");
         jdbcStatusUpdateReceiver = new JdbcStatusUpdateReceiver();
@@ -418,7 +435,9 @@ public class DayFormActivity extends AppCompatActivity {
     /**
      * This method enables to dynamically enable/show disable/hide the save button
      * So, basing on connectivity status, the button is controlled.
-     * @param enable
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param enable a boolean tho control enabled or not
      */
     private void updateButton(boolean enable){
         if (enable){
@@ -436,6 +455,8 @@ public class DayFormActivity extends AppCompatActivity {
      * This method handles what happens when user clicks the save button.
      * It will evaluate the flow conditions to perform the correct CRUD action
      * against DB or do nothing if unnecessary. It holds the finish method call.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void saveUserShift(){
         if(isUpdate){
@@ -475,15 +496,9 @@ public class DayFormActivity extends AppCompatActivity {
     }
 
     /**
-     * An auxiliar method to ease Toast printing
-     * @param s
-     */
-    private void printToast(String s){
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
-    }
-
-    /**
      * Handle AlarmDeactivation and Broadcast receiver de-activation before leaving
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     protected void onStop() {
@@ -492,7 +507,16 @@ public class DayFormActivity extends AppCompatActivity {
         if (checkConnectivity) {
             Log.d("dayformactivity","disabling connectivity watchdog");
             unregisterReceiver(jdbcStatusUpdateReceiver);
-            alarmManager.cancel(alarmPendingIntent);
         }
+    }
+
+    /**
+     * An auxiliar method to ease Toast printing
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s the stream to be printed inside the toast
+     */
+    private void printToast(String s){
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
     }
 }

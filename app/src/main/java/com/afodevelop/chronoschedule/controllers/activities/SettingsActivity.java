@@ -11,6 +11,12 @@ import android.widget.EditText;
 
 import com.afodevelop.chronoschedule.R;
 
+/**
+ * This class is a simple activity that holds a form
+ * it enables the user to edit the application remote MySQL database connection details
+ *
+ * @author Alejandro Olivan Alvarez
+ */
 public class SettingsActivity extends AppCompatActivity {
 
     // CONSTANTS
@@ -22,10 +28,15 @@ public class SettingsActivity extends AppCompatActivity {
     private FloatingActionButton saveButton;
     private String host, port;
 
-    // CONSTRUCTOR
 
     // LOGIC
-
+    /**
+     * On the onCreate method override we put all UI initialization.
+     * Also we declare all view onClick listeners and their inner logic
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,16 +64,19 @@ public class SettingsActivity extends AppCompatActivity {
                 finish();
             }
         });
-
     }
 
-
+    /**
+     * the onCreateOptionsMenu method override is mandatory
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param menu the menu we may override
+     * @return a fixed true valued boolean
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.settings_menu, menu);
         return true;
     }
-
-
 }

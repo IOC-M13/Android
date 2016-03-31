@@ -1,7 +1,5 @@
 package com.afodevelop.chronoschedule.controllers.activities;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,28 +20,33 @@ import com.afodevelop.chronoschedule.controllers.adapters.TabPagerAdapter;
 import com.afodevelop.chronoschedule.controllers.fragments.CalendarFragment;
 import com.afodevelop.chronoschedule.controllers.fragments.ShiftsFragment;
 import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
-import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.ormControllers.ORMAssistant;
-import com.afodevelop.chronoschedule.model.OrmException;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
+import com.afodevelop.chronoschedule.model.JdbcException;
+import com.afodevelop.chronoschedule.model.OrmException;
 import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.Shift;
 import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.SQLException;
 
-
+/**
+ * The main activity class holds the main running logic. It but just holds a tab nav bar.
+ * Fragments managed by the tab nab, layout and adater do but take charge of actual events and
+ * showing. The main activity acts as a holder and a data interchange interface
+ *
+ * @author Alejandro Olivan Alvarez
+ */
 public class MainActivity extends AppCompatActivity {
-
-    // CONSTANTS
-
 
     // INTERNAL CLASS DEFINITIONS
     /**
      * This class is a broadcast reciver. It handles what happens as our
      * activity receives periodically an alarm event: It will trigger a
      * connectivity check!
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
@@ -57,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a connectivity check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class CheckConnectivityTask extends AsyncTask<Void, Void, Void> {
 
@@ -79,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This tasks perform a background process of syncing remote mysql database
      * with local, off-line possible, native, sqlite db.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class ResyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -131,29 +138,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     // CLASS-WIDE VARIABLES
     private MySQLAssistant mySQLAssistant;
     private SQLiteAssistant sqLiteAssistant;
     private ORMAssistant ormAssistant;
     private Menu appMenu;
-    private AlarmManager alarmManager;
-    private PendingIntent alarmPendingIntent;
     private JdbcStatusUpdateReceiver jdbcStatusUpdateReceiver;
-
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private TabPagerAdapter tabPagerAdapter;
     private int currentTab;
-
     private boolean menuRendered, isAdmin, connectivity;
     private boolean UIrendered = false;
     private User user;
 
     // LOGIC
-
     /**
-     * The onCreate method
+     * The onCreate method. Here we are going to initialize all stuff, including the tab menu
+     * Its adapter, the fragmente management, and so
+     *
+     * @author Alejandro Olivan Alvarez
      * @param savedInstanceState
      */
     @Override
@@ -201,23 +205,20 @@ public class MainActivity extends AppCompatActivity {
                 currentTab = tab.getPosition();
                 viewPager.setCurrentItem(currentTab);
             }
-
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
+            public void onTabUnselected(TabLayout.Tab tab) {}
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
+            public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
     /**
-     * Here we got a reference to the action bar menu and its Items
-     * @param menu
-     * @return
+     * Here we got a reference to the action bar menu and its Items, so we control
+     * what has to appear on the action menu each time it re-renders
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param menu the menu to render items into
+     * @return a fixed true boolean value
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -241,8 +242,10 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Handle Items clicking on the menu...
-     * @param item
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param item the menu Item instance pressed by user
+     * @return a fixed tru boolean
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -259,15 +262,19 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * An external handler to allow for manually trigegring a full DB Connectivity check
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void forceConnectivityCheck(){
-        Log.d("mainactivity","asked to force a data resync.");
+        Log.d("mainactivity", "asked to force a data resync.");
         CheckConnectivityTask checkConnectivityTask = new CheckConnectivityTask();
         checkConnectivityTask.execute();
     }
 
     /**
      * An external handler to allow for manually triggering a full DB resync
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void forceResync(){
         if (connectivity) {
@@ -277,6 +284,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * We override the onResume method to prompt for connectivity check and data sync
+     * if connectivity conditions are met
+     *
+     * @author Alejandro Olivan Alvarez
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -292,18 +305,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Save las state using Android native SharedPreferences persistence
-     */
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("mainactivity","stopping");
-        unregisterReceiver(jdbcStatusUpdateReceiver);
-        alarmManager.cancel(alarmPendingIntent);
-    }
-
-    /**
      * This method triggers refresh method inside current displayed fragment.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void refreshFragments() {
         Log.d("refreshFragments", "asked to refresh fragment " + currentTab);
@@ -334,7 +338,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Returns wether or not loged user has administrative rights.
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean true is user has admin rights
      */
     public boolean isAdmin(){
         return isAdmin;
@@ -343,7 +349,9 @@ public class MainActivity extends AppCompatActivity {
     /**
      * This method actually asks out MySQL JDBC assistant to check for
      * available connectivity.
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean true (if conectivity is UP) or false on the contrary
      */
     private boolean checkConnectivity(){
         try {
@@ -359,17 +367,11 @@ public class MainActivity extends AppCompatActivity {
      * This method is responsable of instantiate, initialize and start both an
      * AlrManager driven periodic broadcasting event, and an broadcast listener that,
      * on receiving the advise, trigges connectivity status check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void initializeConnectivityWatchDog(){
         Log.d("mainactivity","Setting the connectivity watchdog");
-        Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
-        alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        long now = System.currentTimeMillis();
-        long interval = 1 * 60 * 1000; // 1 hour
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
-                alarmPendingIntent);
-
         IntentFilter filter = new IntentFilter("com.afodevelop.chronoschedule.MY_TIMER");
         jdbcStatusUpdateReceiver = new JdbcStatusUpdateReceiver();
         registerReceiver(jdbcStatusUpdateReceiver, filter);
@@ -377,6 +379,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This method calls for user deletion on DB. Target user is passed as argument
+     *
+     * @author Alejandro Olivan Alvarez
      * @param user User to be deleted
      * @throws SQLiteException
      * @throws JdbcException
@@ -391,6 +395,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This method calls for Shift deletion on DB. Target shift is passed as argument
+     *
+     * @author Alejandro Olivan Alvarez
      * @param shiftId Shift to be deleted
      * @throws JdbcException
      * @throws SQLException
@@ -405,7 +411,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * An auxiliare method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s The string we want to appear inside the toast
      */
     private void printToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
@@ -414,22 +422,32 @@ public class MainActivity extends AppCompatActivity {
 
     // SETTERS & GETTERS
 
-    public MySQLAssistant getMySQLAssistant() {
-        return mySQLAssistant;
-    }
-
+    /**
+     * The user class variable getter
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return the User class user variable
+     */
     public User getUser() {
         return user;
     }
 
-    public ORMAssistant getOrmAssistant() {
-        return ormAssistant;
-    }
-
+    /**
+     * The sqLiteAssistant class variable getter
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return the SQLiteAssistant class sqLiteAssistant variable
+     */
     public SQLiteAssistant getSqLiteAssistant() {
         return sqLiteAssistant;
     }
 
+    /**
+     * The connectivity class variable getter
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return the boolean class connectivity variable
+     */
     public boolean hasConnectivty() {
         return connectivity;
     }

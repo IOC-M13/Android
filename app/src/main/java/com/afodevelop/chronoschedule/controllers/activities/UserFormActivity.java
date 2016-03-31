@@ -1,7 +1,5 @@
 package com.afodevelop.chronoschedule.controllers.activities;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,23 +17,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.controllers.mysqlControllers.MySQLAssistant;
 import com.afodevelop.chronoschedule.controllers.sqliteControllers.SQLiteAssistant;
+import com.afodevelop.chronoschedule.model.JdbcException;
 import com.afodevelop.chronoschedule.model.SQLiteException;
 import com.afodevelop.chronoschedule.model.User;
 
 import java.sql.SQLException;
 
+/**
+ * This class holds a form to either create, edit or show User data information.
+ * It acts basically as a form holder.
+ *
+ * @author Alejandro Olivan Alvarez
+ */
 public class UserFormActivity extends AppCompatActivity {
-
-    // CONSTANTS
 
     // INTERNAL CLASS DEFINITIONS
     /**
      * This class is a broadcast reciver. It handles what happens as our
      * activity receives periodically an alarm event: It will trigger a
      * connectivity check!
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
@@ -64,6 +68,8 @@ public class UserFormActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class UpdateUserTask extends AsyncTask<Void, Void, Void>{
 
@@ -92,6 +98,8 @@ public class UserFormActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class CreateUserTask extends AsyncTask<Void, Void, Void>{
 
@@ -121,10 +129,7 @@ public class UserFormActivity extends AppCompatActivity {
     // CLASS-WIDE VARIABLES
     private SQLiteAssistant sqLiteAssistant;
     private MySQLAssistant mySQLAssistant;
-    private AlarmManager alarmManager;
-    private PendingIntent alarmPendingIntent;
     private JdbcStatusUpdateReceiver jdbcStatusUpdateReceiver;
-
     private TextView userNameText;
     private EditText userNameEditText;
     private TextView passwordText;
@@ -137,7 +142,6 @@ public class UserFormActivity extends AppCompatActivity {
     private LinearLayout edit_user_labellayout_admin;
     private LinearLayout edit_user_checkboxlayout_admin;
     private FloatingActionButton saveButton;
-
     private String mode;
     private User user;
     private boolean connectivity;
@@ -145,7 +149,13 @@ public class UserFormActivity extends AppCompatActivity {
     private boolean isUpdate;
 
     // LOGIC
-
+    /**
+     * The onCreate method override is fairly simple, it initializes classwide variables
+     * and switches logic flow upon Intent data evaluation
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -170,6 +180,8 @@ public class UserFormActivity extends AppCompatActivity {
 
     /**
      * Handle here logic for new user activity logic flow
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void newModeLogic(){
         setTitle("Create User");
@@ -188,6 +200,8 @@ public class UserFormActivity extends AppCompatActivity {
 
     /**
      * Handle here logic for edit user activity logic flow
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void editModeLogic(){
         setTitle("Edit User");
@@ -213,6 +227,8 @@ public class UserFormActivity extends AppCompatActivity {
 
     /**
      * Handle here logic for show user details activity logic flow
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void showModeLogic(){
         setTitle("User Details");
@@ -234,7 +250,10 @@ public class UserFormActivity extends AppCompatActivity {
     /**
      * Instantiate all dynamically altered Views. The method receives a boolean to
      * indicate either userName editable or not.
-     * @param userNameEditable
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param userNameEditable a boolean to decide if the UI shows editable userName
+     *                         or not
      */
     private void renderUI(boolean userNameEditable, boolean dataEditable, boolean saveable){
         if (userNameEditable) {
@@ -283,7 +302,9 @@ public class UserFormActivity extends AppCompatActivity {
     /**
      * This method enables to dynamically enable/show disable/hide the save button
      * So, basing on connectivity status, the button is controlled.
-     * @param enable
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param enable a boolean stating whether the fab button has to be rendered
      */
     private void updateButton(boolean enable){
         if (enable){
@@ -300,6 +321,8 @@ public class UserFormActivity extends AppCompatActivity {
     /**
      * This method triggers the final sentences against DB to persist the new user
      * Or to persist current user changes.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void saveUser(){
         if (isUpdate){
@@ -325,7 +348,9 @@ public class UserFormActivity extends AppCompatActivity {
     /**
      * This method actually asks out MySQL JDBC assistant to check for
      * available connectivity.
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean evaluating connectivity up (true) or down (false)
      */
     private boolean checkConnectivity(){
         try {
@@ -341,16 +366,10 @@ public class UserFormActivity extends AppCompatActivity {
      * This method is responsable of instantiate, initialize and start both an
      * AlrManager driven periodic broadcasting event, and an broadcast listener that,
      * on receiving the advise, trigges connectivity status check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void initializeConnectivityWatchDog(){
-        Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
-        alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        long now = System.currentTimeMillis();
-        long interval = 1 * 60 * 1000; // 1 hour
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
-                alarmPendingIntent);
-
         IntentFilter filter = new IntentFilter("com.afodevelop.chronoschedule.MY_TIMER");
         jdbcStatusUpdateReceiver = new JdbcStatusUpdateReceiver();
         registerReceiver(jdbcStatusUpdateReceiver, filter);
@@ -358,19 +377,22 @@ public class UserFormActivity extends AppCompatActivity {
 
     /**
      * Handle AlarmDeactivation and Broadcast receiver de-activation before leaving
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     protected void onStop() {
         super.onStop();
         if (checkConnectivity) {
             unregisterReceiver(jdbcStatusUpdateReceiver);
-            alarmManager.cancel(alarmPendingIntent);
         }
     }
 
     /**
      * An auxiliar method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s the string text we want printed on the toast
      */
     private void printToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();

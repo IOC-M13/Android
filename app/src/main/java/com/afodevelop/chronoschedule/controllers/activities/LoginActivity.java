@@ -38,6 +38,8 @@ import java.sql.SQLException;
 
 /**
  * A login screen that offers login via username/password.
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -55,6 +57,8 @@ public class LoginActivity extends AppCompatActivity {
      * This class is a broadcast reciver. It handles what happens as our
      * activity receives periodically an alarm event: It will trigger a
      * connectivity check!
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class JdbcStatusUpdateReceiver extends BroadcastReceiver {
 
@@ -68,6 +72,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * This class is an AsyncTask based task that performs a connectivity check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class CheckConnectivityTask extends AsyncTask<Void, Void, Void> {
 
@@ -90,6 +96,8 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class InitializationTask extends AsyncTask<Void, Void, Void> {
 
@@ -150,6 +158,8 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * This tasks perform a background process of syncing remote mysql database
      * with local, off-line possible, native, sqlite db.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class ResyncTask extends AsyncTask<Void, Void, Void> {
 
@@ -226,6 +236,12 @@ public class LoginActivity extends AppCompatActivity {
 
     // LOGIC
 
+    /**
+     * The onCreate method contains all initialization logic
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -252,8 +268,10 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Here we got a reference to the action bar menu and its Items
-     * @param menu
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param menu the menu Item instance clicked by user
+     * @return a fixed true value
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -275,6 +293,11 @@ public class LoginActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * we override the onResume method to prompt for connectivity check
+     *
+     * @author Alejandro Olivan Alvarez
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -288,6 +311,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Initialize our MySQL conection assistant
+     *
+     * @author Alejandro Olivan Alvarez
      * @throws JdbcException
      */
     private void initializeMySQL() throws JdbcException {
@@ -302,6 +327,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Initialize our SQLite local DB assistant
+     *
+     * @author Alejandro Olivan Alvarez
      * @throws SQLiteException
      */
     private void initializeSQLite() throws SQLiteException {
@@ -314,6 +341,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Initialize a Memory cache for ORM transactions and cache
+     *
+     * @author Alejandro Olivan Alvarez
      * @throws OrmException
      */
     private void initializeORM() throws OrmException {
@@ -333,13 +362,15 @@ public class LoginActivity extends AppCompatActivity {
      * This method is responsable of instantiate, initialize and start both an
      * AlrManager driven periodic broadcasting event, and an broadcast listener that,
      * on receiving the advise, trigges connectivity status check.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void initializeConnectivityWatchDog(){
         Intent intent = new Intent("com.afodevelop.chronoschedule.MY_TIMER");
         alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         long now = System.currentTimeMillis();
-        long interval = 1 * 60 * 1000; // 1 hour
+        long interval = 1 * 15 * 1000; // 1 hour
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
                 alarmPendingIntent);
 
@@ -350,6 +381,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * This method takes charge of instantiating, and initializing the UI.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void renderUI() {
         // Set up the login form.
@@ -392,6 +425,8 @@ public class LoginActivity extends AppCompatActivity {
      * The main logic method is called separatelly, and after initialization,
      * because it simply controls the flow of program execution based on
      * all previous environment setup.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void mainLogic(){
         Log.d("execute", "firstexecution: " + firstExecution + ", connectivity: " + connectivity);
@@ -419,6 +454,8 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * This method is used to persist connection details as
      * shared preferences
+     *
+     * @author Alejandro Olivan Alvarez
      * @param host a string with host name or IP address
      * @param port a string with MySQL listen port
      */
@@ -437,7 +474,9 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * This method actually asks out MySQL JDBC assistant to check for
      * available connectivity.
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean true (connectivity OK) or false on teh contrary
      */
     private boolean checkConnectivity(){
         try {
@@ -454,6 +493,8 @@ public class LoginActivity extends AppCompatActivity {
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void attemptLogin() {
         // Reset errors.
@@ -505,7 +546,9 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * This method is responsible of gracefully pass all assistant and artifacts to the
      * main activity
-     * @param user
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param user A User object instance representing the candidate
      */
     private void signIn(User user) {
         Bundle extras = new Bundle();
@@ -518,6 +561,8 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * This method launches the settings activity passing it the
      * current connection data.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void launchSettings() {
         Log.d("launchSettings","setingsActivity");
@@ -531,6 +576,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Manage return from Activity calls
+     *
+     * @author Alejandro Olivan Alvarez
      * @param requestCode
      * @param resultCode
      * @param data
@@ -561,8 +608,10 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Handle ActionBar Items press
-     * @param item
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param item the menu item instance clicked by user
+     * @return a true valued boolean
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -583,6 +632,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Save las state using Android native SharedPreferences persistence
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     protected void onStop() {
@@ -590,13 +641,14 @@ public class LoginActivity extends AppCompatActivity {
         if(!firstExecution) {
             storePreferences(dbHost, dbPort);
             unregisterReceiver(jdbcStatusUpdateReceiver);
-            alarmManager.cancel(alarmPendingIntent);
         }
     }
 
     /**
      * An auxiliare method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s The string to be printed inside the toast
      */
     private void printToast(String s){
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
