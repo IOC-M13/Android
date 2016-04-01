@@ -38,12 +38,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by alex on 3/03/16.
+ * This is the Fragment Class that holds the Calendar.
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class CalendarFragment extends Fragment {
-
-    // COSTANTS
-
 
     // CLASSWIDE VARIABLES
     private MainActivity mainActivity;
@@ -55,7 +54,6 @@ public class CalendarFragment extends Fragment {
     private TextView selectedUserText;
     private SimpleDateFormat df, dm;
     private Calendar currentCalendar;
-
     private String[] userNames;
     private String[] shiftNames;
     private String[] shiftColors;
@@ -66,6 +64,8 @@ public class CalendarFragment extends Fragment {
 
     /**
      * This internal class defines the calendar day decorator object
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class ColorDecorator implements DayDecorator {
         @Override
@@ -81,8 +81,18 @@ public class CalendarFragment extends Fragment {
 
     // LOGIC
 
+    /**
+     * The Fragment's onCreateView mandatory override that holds Vies initialization
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return The Resulting Generated Fragment
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         myFragmentView = inflater.inflate(R.layout.calendar_fragment, container, false);
 
         // Initialize a variable pointing to parent Activity
@@ -111,6 +121,8 @@ public class CalendarFragment extends Fragment {
     /**
      * We are using the onResume flow call to prompt for calendar refreshing:
      * Refreshthe data, the decoration, and apply all this again to the calendar
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     public void onResume() {
@@ -122,6 +134,8 @@ public class CalendarFragment extends Fragment {
 
     /**
      * A method that creates the non-admin user name clickable bar
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void setupUserBar(){
         selectedUserText = (TextView) myFragmentView.findViewById(R.id.calendar_user_text);
@@ -145,6 +159,8 @@ public class CalendarFragment extends Fragment {
     /**
      * Setup a spinner for admin users so they can choose which user they want to
      * work onto.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private void setupSpinner(){
         spinner = (Spinner) myFragmentView.findViewById(R.id.calendar_user_spinner);
@@ -173,15 +189,15 @@ public class CalendarFragment extends Fragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 
     /**
      * This method launches the FormDay activity, It does it with dynamic Bundle data
      * based on received arguments
+     *
+     * @author Alejandro Olivan Alvarez
      * @param date Date of the Day
      * @param mode mode (new, edit, show)
      */
@@ -199,6 +215,8 @@ public class CalendarFragment extends Fragment {
     /**
      * Get/Refresh data from DB to fill arrays of strings with most used data
      * usernames, shiftnames and shift colors
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void refreshData(){
         try {
@@ -219,6 +237,8 @@ public class CalendarFragment extends Fragment {
      * This method actually instantiates and sets up the calendar View on the
      * fragment, initializing dateformats, week format, current date, and setting
      * the preceptive click listener.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void setupCalendar(){
         calendarView = (CustomCalendarView) myFragmentView.findViewById(R.id.calendar_view);
@@ -253,6 +273,8 @@ public class CalendarFragment extends Fragment {
 
     /**
      * This method regenerates the calendar colors
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void refreshCalendarDecoration(){
         //adding calendar day decorators
@@ -266,10 +288,13 @@ public class CalendarFragment extends Fragment {
 
     /**
      * Encapsulate the calendar generation method
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void refreshCalendarLegend(){
         Log.d("calendarFragment","refreshing calendar legend");
-        ShiftsLegendListAdapter adapter = new ShiftsLegendListAdapter(getActivity(), shiftColors, shiftNames);
+        ShiftsLegendListAdapter adapter = new ShiftsLegendListAdapter(getActivity(),
+                shiftColors, shiftNames);
         ListView list = (ListView) myFragmentView.findViewById(R.id.shifts_legend_list);
         list.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -278,6 +303,8 @@ public class CalendarFragment extends Fragment {
     /**
      * This method queries the selected user's calendar UserShift entries for a given
      * data. It returns the Shift color for that day
+     *
+     * @author Alejandro Olivan Alvarez
      * @param cell The Day Cell (a Calendar Date) to be queried
      * @return a String with hex color
      */
@@ -301,7 +328,9 @@ public class CalendarFragment extends Fragment {
 
     /**
      * An auxiliar method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s A string with the text we want to print in the toast
      */
     private void printToast(String s){
         Toast.makeText(mainActivity, s, Toast.LENGTH_SHORT).show();

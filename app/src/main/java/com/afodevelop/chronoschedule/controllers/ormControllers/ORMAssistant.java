@@ -12,7 +12,10 @@ import com.afodevelop.chronoschedule.model.ORMCache;
 import java.sql.SQLException;
 
 /**
- * Created by alex on 18/03/16.
+ * This class encapsulates the methods that manage the ORMCache class creation to get
+ * relational <-> object-based translation, mapping and instance caching
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class ORMAssistant {
 
@@ -28,6 +31,8 @@ public class ORMAssistant {
 
     /**
      * ORMAssistant is a singleton class
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private ORMAssistant() {}
 
@@ -35,6 +40,8 @@ public class ORMAssistant {
 
     /**
      * Singleton style instance getter
+     *
+     * @author Alejandro Olivan Alvarez
      * @return the single ORMAssistant object.
      */
     public static ORMAssistant getInstance(){
@@ -44,6 +51,14 @@ public class ORMAssistant {
         return ourInstance;
     }
 
+    /**
+     * This method initializes necessary variables to grant functionality
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param my a MySQLAssistant instance to interface the remote MySQL DB
+     * @param sq a SQLiteAssistant instance to interface the local SQLite DB
+     * @throws OrmException
+     */
     public void initialize(MySQLAssistant my, SQLiteAssistant sq) throws OrmException {
         if (my != null && sq != null){
             if (mySQLAssistant == null && sqLiteAssistant == null){
@@ -64,6 +79,8 @@ public class ORMAssistant {
 
     /**
      * This method triggers MySQL -> SQLite sync
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void launchResync() throws OrmException,
             SQLiteException, JdbcException, SQLException, ClassNotFoundException {
@@ -77,7 +94,6 @@ public class ORMAssistant {
 
             //Dump cached data into SQLite
             sqLiteAssistant.persistOrmCache(dataCache);
-
         } else {
             Log.d("LaunchResync","exception thrown by uninitialized usage.");
             throw new OrmException("Resync impossible without previous class initilialization.");
@@ -85,11 +101,14 @@ public class ORMAssistant {
 
     }
 
+    /**
+     * This method replies either true or false depending if the current instance has been
+     * correctly initialized.
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean indicating initialized state (true) or not (false)
+     */
     public boolean isInitialized(){
         return initialized;
     }
-
-    // SETTERS AND GETTERS
-
-
 }

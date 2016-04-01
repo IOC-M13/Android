@@ -16,14 +16,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
- * Created by alex on 1/03/16.
+ * This class encapsulates all method related with SQL CRUD execution methods
+ * against MySQL database. It uses a MySQLConnectorFactory to retrieve actual
+ * connections to database as needed.
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class MySQLAssistant {
 
-
     //CONSTANTS
     private static MySQLAssistant ourInstance = null;
-
     private static final String USERS_SELECT = "SELECT * FROM Users";
     private static final String USER_INSERT = "INSERT INTO Users " +
             "(userDni, userName, realName, pass, admin) VALUES (?, ?, ?, ?, ?)";
@@ -31,8 +33,6 @@ public class MySQLAssistant {
             "userDni = ?, userName = ?, realName = ?, pass = ?, admin = ? " +
             "WHERE idUser = ?;";
     private static final String USER_DELETE = "DELETE FROM Users WHERE userName = ?;";
-
-
     private static final String SHIFTS_SELECT = "SELECT * FROM Shifts";
     private static final String SHIFT_INSERT = "INSERT INTO Shifts " +
             "(name, startTime, endTime, color) VALUES (?, ?, ?, ?)";
@@ -40,7 +40,6 @@ public class MySQLAssistant {
             "name = ?, startTime = ?, endTime = ?, color = ? " +
             "WHERE idShift = ?;";
     private static final String SHIFT_DELETE = "DELETE FROM Shifts WHERE idShift = ?;";
-
     private static final String USER_SHIFTS_SELECT = "SELECT * FROM UserShifts";
     private static final String USERSHIFT_INSERT = "INSERT INTO UserShifts " +
             "(idUser, idShift, date) VALUES (?, ?, ?)";
@@ -49,7 +48,6 @@ public class MySQLAssistant {
             "WHERE idUser = ? AND date = ?;";
     private static final String USERSHIFT_DELETE = "DELETE FROM UserShifts " +
             "WHERE idUser = ? AND date = ?;";
-
 
     //CLASSWIDE VARIABLES
     private boolean initialized = false;
@@ -62,8 +60,10 @@ public class MySQLAssistant {
     //LOGIC
 
     /**
-     * Singleton get instance method
-     * @return
+     * This class is asingleton class... and this is the preceptive get instance method
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return A unique/single MySQLAssistant class instance.
      */
     public static MySQLAssistant getInstance(){
         if (ourInstance == null){
@@ -74,6 +74,8 @@ public class MySQLAssistant {
 
     /**
      * This method initializes the MySQLAssistant with a MySQLConnectionFactory
+     *
+     * @author Alejandro Olivan Alvarez
      * @param factory a pre-configured MySQLConnectorFactory
      */
     public void initialize(MySQLConnectorFactory factory) throws JdbcException {
@@ -92,6 +94,8 @@ public class MySQLAssistant {
     /**
      * This method allow to query wether the Assistant has been properly
      * initialized.
+     *
+     * @author Alejandro Olivan Alvarez
      * @return eiter true or false
      */
     public boolean isInitialized(){
@@ -99,9 +103,12 @@ public class MySQLAssistant {
     }
 
     /**
+     * This method allows to execute general queries against the database.
+     * The main target of this method is code optimization since it will be reused often.
      *
-     * @param sqlQuery
-     * @return
+     * @author Alejandro Olivan Alvarez
+     * @param sqlQuery A string with the SQL query we want to launch at the DB
+     * @return a ResultSet with the DB reply on the query
      * @throws SQLException
      * @throws ClassNotFoundException
      */
@@ -119,8 +126,11 @@ public class MySQLAssistant {
     }
 
     /**
+     * This method queries the db for available Shifts in DB. it handles result set
+     * reply generating a collection of Shift Instances.
      *
-     * @return
+     * @author Alejandro Olivan Alvarez
+     * @return an ArrayList containing all possible Shift instances
      * @throws SQLException
      * @throws ClassNotFoundException
      */
@@ -155,8 +165,11 @@ public class MySQLAssistant {
     }
 
     /**
+     * This method queries the db for available users in DB. it handles result set
+     * reply generating a collection of user Instances.
      *
-     * @return
+     * @author Alejandro Olivan Alvarez
+     * @return an ArrayList containing all possible User instances
      * @throws SQLException
      * @throws ClassNotFoundException
      */
@@ -191,7 +204,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * This method generates a Memory cache of available users as User instances
+     * within an ORMCache object.
      *
+     * @author Alejandro Olivan Alvarez
      * @return
      * @throws SQLException
      * @throws ClassNotFoundException
@@ -202,19 +218,22 @@ public class MySQLAssistant {
             ResultSet userShifts = queryDatabase(USER_SHIFTS_SELECT);
 
             while (userShifts.next()){
-                cache.addUserShift(userShifts.getInt(1), userShifts.getInt(2), userShifts.getDate(3));
+                cache.addUserShift(userShifts.getInt(1), userShifts.getInt(2),
+                        userShifts.getDate(3));
             }
             closeConnection();
 
             return cache;
         } else {
-            throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
+            throw new JdbcException("Uninitialized MySQLAssistant usage attempt");
         }
     }
 
     /**
+     * This method performs a connectivity test against the SQL server
      *
-     * @return
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean indicating connectivity is possible (true) or not (false)
      */
     public boolean checkConnectivity() throws JdbcException {
         if (initialized) {
@@ -238,8 +257,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DCL query to persist a User instance in DB
      *
-     * @param newUser
+     * @author Alejandro Olivan Alvarez
+     * @param newUser the User instance to be persisted on DB
      * @throws SQLException
      * @throws JdbcException
      * @throws ClassNotFoundException
@@ -257,6 +278,15 @@ public class MySQLAssistant {
         closeConnection();
     }
 
+    /**
+     * Handle SQL DML query to delete a User in DB
+     *
+     * @author Alejandro Olivan Alvare
+     * @param targetUser the User instance actually mapped on DB
+     * @throws SQLException
+     * @throws JdbcException
+     * @throws ClassNotFoundException
+     */
     public void deleteUser(User targetUser) throws SQLException, JdbcException, ClassNotFoundException {
         openConnection();
         PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USER_DELETE);
@@ -267,8 +297,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DML query to update a User data in DB
      *
-     * @param targetUser
+     * @author Alejandro Olivan Alvarez
+     * @param targetUser the User instance actually mapped on DB
      * @throws SQLException
      * @throws JdbcException
      * @throws ClassNotFoundException
@@ -288,8 +320,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DCL query to persist a UserShift instance in DB
      *
-     * @param s
+     * @author Alejandro Olivan Alvarez
+     * @param s the UserShift instance to be persisted on DB
      * @throws JdbcException
      * @throws SQLException
      * @throws ClassNotFoundException
@@ -297,7 +331,7 @@ public class MySQLAssistant {
     public void insertUserShift(UserShift s) throws JdbcException, SQLException, ClassNotFoundException {
         openConnection();
         PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USERSHIFT_INSERT);
-        preparedStmt.setInt(1, s.getuser().getIdUser());
+        preparedStmt.setInt(1, s.getUser().getIdUser());
         preparedStmt.setInt(2, s.getShift().getIdShift());
         preparedStmt.setDate(3, s.getDate());
         // execute the java preparedstatement
@@ -306,8 +340,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DML query to delete a UserShift in DB
      *
-     * @param s
+     * @author Alejandro Olivan Alvarez
+     * @param s the UserShift instance actually mapped on DB
      * @throws JdbcException
      * @throws SQLException
      * @throws ClassNotFoundException
@@ -315,7 +351,7 @@ public class MySQLAssistant {
     public void deleteUserShift(UserShift s) throws JdbcException, SQLException, ClassNotFoundException {
         openConnection();
         PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USERSHIFT_DELETE);
-        preparedStmt.setInt(1, s.getuser().getIdUser());
+        preparedStmt.setInt(1, s.getUser().getIdUser());
         preparedStmt.setDate(2, s.getDate());
         // execute the java preparedstatement
         preparedStmt.executeUpdate();
@@ -323,8 +359,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DML query to update a UserShift data in DB
      *
-     * @param s
+     * @author Alejandro Olivan Alvarez
+     * @param s the UserShift instance actually mapped on DB
      * @throws JdbcException
      * @throws SQLException
      * @throws ClassNotFoundException
@@ -333,7 +371,7 @@ public class MySQLAssistant {
         openConnection();
         PreparedStatement preparedStmt = mySQLConnection.prepareStatement(USERSHIFT_UPDATE);
         preparedStmt.setInt(1, s.getShift().getIdShift());
-        preparedStmt.setInt(2, s.getuser().getIdUser());
+        preparedStmt.setInt(2, s.getUser().getIdUser());
         preparedStmt.setDate(3, s.getDate());
         // execute the java preparedstatement
         preparedStmt.executeUpdate();
@@ -341,8 +379,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DCL query to persist a Shift instance in DB
      *
-     * @param newShift
+     * @author Alejandro Olivan Alvarez
+     * @param newShift the Shift instance to be persisted on DB
      * @throws JdbcException
      * @throws SQLException
      * @throws ClassNotFoundException
@@ -360,8 +400,10 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DML query to delete a Shift in DB
      *
-     * @param targetShift
+     * @author Alejandro Olivan Alvarez
+     * @param targetShift the Shift instance actually mapped on DB
      * @throws JdbcException
      * @throws SQLException
      * @throws ClassNotFoundException
@@ -376,13 +418,16 @@ public class MySQLAssistant {
     }
 
     /**
+     * Handle SQL DML query to update a Shift data in DB
      *
-     * @param targetShift
+     * @author Alejandro Olivan Alvarez
+     * @param targetShift the Shift instance actually mapped on DB
      * @throws JdbcException
      * @throws SQLException
      * @throws ClassNotFoundException
      */
-    public void updateShift(Shift targetShift) throws JdbcException, SQLException, ClassNotFoundException {
+    public void updateShift(Shift targetShift) throws JdbcException, SQLException,
+            ClassNotFoundException {
         openConnection();
         PreparedStatement preparedStmt = mySQLConnection.prepareStatement(SHIFT_UPDATE);
         preparedStmt.setString(1, targetShift.getName());
@@ -396,7 +441,9 @@ public class MySQLAssistant {
     }
 
     /**
+     * This method orders a connection with database has to be obtained
      *
+     * @author Alejandro Olivan Alvarez
      * @throws SQLException
      * @throws ClassNotFoundException
      */
@@ -410,7 +457,9 @@ public class MySQLAssistant {
     }
 
     /**
+     * This method orders a connection closing with database
      *
+     * @author Alejandro Olivan Alvarez
      * @throws SQLException
      */
     public void closeConnection() throws SQLException, JdbcException {
@@ -421,10 +470,5 @@ public class MySQLAssistant {
             throw new JdbcException("Uninitialized MySQLAssitant usage attempt");
         }
     }
-
-
-    // SETTERS AND GETTERS
-
-
 }
 

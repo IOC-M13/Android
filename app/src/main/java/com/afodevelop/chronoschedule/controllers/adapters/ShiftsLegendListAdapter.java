@@ -12,23 +12,36 @@ import android.widget.TextView;
 import com.afodevelop.chronoschedule.R;
 
 /**
- * Created by alex on 4/03/16.
+ * This class is the adapter that builds the Shifts List that appears on the legend
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class ShiftsLegendListAdapter extends ArrayAdapter<String> {
 
+    // CLASS_WIDE VARIABLES
     private final Activity context;
     private final String[] rgbColors;
     private final String[] shiftNames;
 
+    // CONSTRUCTOR
     public ShiftsLegendListAdapter(Activity context, String[] rgbColors, String[] shiftNames) {
         super(context, R.layout.shiftslegend_listview, shiftNames);
-        // TODO Auto-generated constructor stub
 
         this.context = context;
         this.rgbColors = rgbColors;
         this.shiftNames = shiftNames;
     }
 
+    /**
+     * The getView method mandatory override.
+     * Here the view is finally assembled before returning it back
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param position
+     * @param view
+     * @param parent
+     * @return
+     */
     public View getView(int position,View view,ViewGroup parent) {
         LayoutInflater inflater=context.getLayoutInflater();
         View rowView=inflater.inflate(R.layout.shiftslegend_listview, null, true);
@@ -39,6 +52,5 @@ public class ShiftsLegendListAdapter extends ArrayAdapter<String> {
         shiftName.setText(shiftNames[position]);
 
         return rowView;
-    };
-
+    }
 }

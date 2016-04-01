@@ -9,11 +9,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Created by alex on 1/03/16.
+ * This class is an auxiliar class of MySQLAssistant class.
+ * It takes care of lower level connectivity details and management.
+ *
+ * @author Alejandro Olivan Alvarez
  */
-
 public class MySQLConnectorFactory {
-
 
     // CLASSWIDE VARIABLES
     Connection mySQLConnection = null;
@@ -45,7 +46,12 @@ public class MySQLConnectorFactory {
     // LOGIC METHODS
 
     /**
+     * This method initializes or renews the internal class connection to the
+     * database, so it can be later required and used.
+     * It will also provide a method to re-establish connection if the current
+     * connection times-out.
      *
+     * @author Alejandro Olivan Alvarez
      * @throws ClassNotFoundException
      * @throws SQLException
      */
@@ -59,8 +65,10 @@ public class MySQLConnectorFactory {
     }
 
     /**
+     * This method returns a Connection class instance that points to the database.
      *
-     * @return
+     * @author Alejandro Olivan Alvarez
+     * @return A Connection to the MySQL server
      * @throws SQLException
      * @throws ClassNotFoundException
      */
@@ -75,22 +83,5 @@ public class MySQLConnectorFactory {
         } else {
             return null;
         }
-    }
-
-    // GETTERS AND SETTERS
-    public boolean isInitialized() {
-        return initialized;
-    }
-
-    public String getUrl() {
-        return dbUrl;
-    }
-
-    public String getDbUser(){
-        return dbUser;
-    }
-
-    public String getDbUserPassword() {
-        return dbUserPassword;
     }
 }

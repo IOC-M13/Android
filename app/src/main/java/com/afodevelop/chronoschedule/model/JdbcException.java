@@ -1,7 +1,9 @@
 package com.afodevelop.chronoschedule.model;
 
 /**
- * Created by alex on 14/03/16.
+ * A custom Exception to handle JDBC operation-related exceptions
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class JdbcException extends Exception {
 

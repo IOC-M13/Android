@@ -16,9 +16,18 @@ import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
 import java.util.ArrayList;
 
 /**
- * Created by alex on 10/03/16.
+ * This class is the Tab adapter that generates the tabs on the main activity
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class UsersListArrayAdapter extends ArrayAdapter<String> {
+
+    // INTERNAL CLASS DEFINITIONS
+    private static class UserHolder {
+        ImageButton btnDelete;
+        ImageButton btnEdit;
+        TextView itemName;
+    }
 
     // CLASS-WIDE VARIABLES
     Context context;
@@ -38,6 +47,17 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
     }
 
     // LOGIC
+
+    /**
+     * The getView method mandatory override.
+     * Here the view is finally assembled before returning it back
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
     public View getView(int position, View convertView, final ViewGroup parent) {
         View row = convertView;
@@ -79,11 +99,5 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
         });
 
         return row;
-    }
-
-    static class UserHolder {
-        ImageButton btnDelete;
-        ImageButton btnEdit;
-        TextView itemName;
     }
 }

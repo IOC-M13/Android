@@ -20,17 +20,17 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Created by alex on 15/03/16.
+ * This class encapsulates all needed methods to interface with local SQLite database.
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class SQLiteAssistant {
 
     //CONSTANTS
     private static SQLiteAssistant ourInstance = null;
-
     protected static final int VERSION = 1;
     protected static final String TAG = "SQLConnection";
     protected static final String DB_NAME = "BDChronoSchedule";
-
     protected static final String DB_USER_TABLE = "Users";
     protected static final String KEY_USER_IDUSER = "idUser";
     protected static final String KEY_USER_USERDNI = "userDni";
@@ -38,7 +38,6 @@ public class SQLiteAssistant {
     protected static final String KEY_USER_REALNAME= "realName";
     protected static final String KEY_USER_PASS = "pass";
     protected static final String KEY_USER_ADMIN = "admin";
-
     protected static final String DB_CREATE_USERS = "" +
             "CREATE TABLE " + DB_USER_TABLE + " ( "
             + KEY_USER_IDUSER + " INTEGER PRIMARY KEY, "
@@ -47,17 +46,14 @@ public class SQLiteAssistant {
             + KEY_USER_REALNAME + " TEXT, "
             + KEY_USER_PASS + " TEXT , "
             + KEY_USER_ADMIN + " INTEGER );";
-
     protected static final String DB_CLEAR_USERS = "" +
             "DELETE FROM " + DB_USER_TABLE +";";
-
     protected static final String DB_SHIFT_TABLE = "Shifts";
     protected static final String KEY_SHIFT_IDSHIFT = "idShift";
     protected static final String KEY_SHIFT_NAME = "name";
     protected static final String KEY_SHIFT_STARTTIME = "startTime";
     protected static final String KEY_SHIFT_ENDTIME = "endTime";
     protected static final String KEY_SHIFT_COLOR = "color";
-
     protected static final String DB_CREATE_SHIFTS = "" +
             "CREATE TABLE " + DB_SHIFT_TABLE + " ( "
             + KEY_SHIFT_IDSHIFT + " INTEGER PRIMARY KEY, "
@@ -65,16 +61,12 @@ public class SQLiteAssistant {
             + KEY_SHIFT_STARTTIME + " TEXT, "
             + KEY_SHIFT_ENDTIME + " TEXT, "
             + KEY_SHIFT_COLOR + " TEXT );";
-
     protected static final String DB_CLEAR_SHIFTS = "" +
             "DELETE FROM " + DB_SHIFT_TABLE +";";
-
-
     protected static final String DB_USERSHIFT_TABLE = "UserShifts";
     protected static final String KEY_USERSHIFT_IDUSER = "idUser";
     protected static final String KEY_USERSHIFT_IDSHIFT = "idShift";
     protected static final String KEY_USERSHIFT_DATE = "date";
-
     protected static final String DB_CREATE_USERSHIFTS = "" +
             "CREATE TABLE " + DB_USERSHIFT_TABLE + " ( "
             + KEY_USERSHIFT_IDUSER + " INTEGER, "
@@ -84,10 +76,8 @@ public class SQLiteAssistant {
             + KEY_USERSHIFT_IDUSER + ", "
             + KEY_USERSHIFT_IDSHIFT + ", "
             + KEY_USERSHIFT_DATE + "));";
-
     protected static final String DB_CLEAR_USERSSHIFTS = "" +
             "DELETE FROM " + DB_USERSHIFT_TABLE +";";
-
     protected static final String DB_UPDATE_USERS = "" +
             "DROP TABLE IF EXISTS " + DB_USER_TABLE +"; ";
     protected static final String DB_UPDATE_SHIFTS = "" +
@@ -95,12 +85,13 @@ public class SQLiteAssistant {
     protected static final String DB_UPDATE_USERSHIFTS = "" +
             "DROP TABLE IF EXISTS " + DB_USERSHIFT_TABLE +"; ";
 
-
     // INTERNAL CLASSES
 
     /**
      * This is an internal SQLiteOpenHelper class!!
-     * Tihs one is the core class when SQLite speaking...
+     * This one is the core class when SQLite speaking...
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class SQLiteHelper extends SQLiteOpenHelper { // <- START OF INNER CLASS
 
@@ -144,6 +135,8 @@ public class SQLiteAssistant {
     // CONSTRUCTOR
     /**
      * SQLiteAssistant is a singleton, so it has a private constructor
+     * @author Alejandro Olivan Alvarez
+     *
      */
     private SQLiteAssistant() {}
 
@@ -152,6 +145,8 @@ public class SQLiteAssistant {
     /**
      * This method acts as a class initializator. It initializes the context and instantiates
      * The internal SQliteHelper instance with that same context.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void initialize(Context c) throws SQLiteException {
         // We set the context
@@ -170,7 +165,9 @@ public class SQLiteAssistant {
     }
 
     /**
-     * This getter provides the single existant instance
+     * This getter provides the single existent instance
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public static SQLiteAssistant getInstance() {
         if (ourInstance == null) {
@@ -181,6 +178,8 @@ public class SQLiteAssistant {
 
     /**
      * Open Database connection
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void openDb() throws SQLiteException {
         if (initialized) {
@@ -192,6 +191,8 @@ public class SQLiteAssistant {
 
     /**
      * Close Database connection
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void closeDb() throws SQLiteException {
         if (initialized) {
@@ -203,6 +204,8 @@ public class SQLiteAssistant {
 
     /**
      * Insert a single user into database
+     *
+     * @author Alejandro Olivan Alvarez
      * @param user an User object which has to be persisted
      * @return long with row ID or -1 if error
      */
@@ -225,6 +228,8 @@ public class SQLiteAssistant {
 
     /**
      * Insert a single shift into database
+     *
+     * @author Alejandro Olivan Alvarez
      * @param shift a Shift object which has to be persisted
      * @return ong with row ID or -1 if error
      */
@@ -246,6 +251,8 @@ public class SQLiteAssistant {
 
     /**
      * Insert a single userShift into database
+     *
+     * @author Alejandro Olivan Alvarez
      * @param userShift a UserShift object which has to be persisted
      * @return ong with row ID or -1 if error
      */
@@ -253,7 +260,7 @@ public class SQLiteAssistant {
         if (initialized) {
             // Load data from argument
             ContentValues newValues = new ContentValues();
-            newValues.put(KEY_USERSHIFT_IDUSER, userShift.getuser().getIdUser());
+            newValues.put(KEY_USERSHIFT_IDUSER, userShift.getUser().getIdUser());
             newValues.put(KEY_USERSHIFT_IDSHIFT, userShift.getShift().getIdShift());
             newValues.put(KEY_USERSHIFT_DATE, userShift.getDate().toString());
             // return row ID
@@ -264,55 +271,9 @@ public class SQLiteAssistant {
     }
 
     /**
-     * This method inserts a row in the table with passed arguments
-     * @param user an User object to be persisted
-     * @return
-     */
-    public long insertUser(User user) throws SQLiteException {
-        if (initialized) {
-            openDb();
-            long result =  putUser(user);
-            closeDb();
-            return result;
-        } else {
-            throw new SQLiteException("SQLiteAssistant still not initialized.");
-        }
-    }
-
-    /**
-     * This method inserts a row in the table with passed arguments
-     * @param shift a Shift object to be persisted
-     * @return
-     */
-    public long insertShift(Shift shift) throws SQLiteException {
-        if (initialized) {
-            openDb();
-            long result =  putShift(shift);
-            closeDb();
-            return result;
-        } else {
-            throw new SQLiteException("SQLiteAssistant still not initialized.");
-        }
-    }
-
-    /**
-     * This method inserts a row in the table with passed arguments
-     * @param userShift a UserShift object to be persisted
-     * @return
-     */
-    public long insertUserShift(UserShift userShift) throws SQLiteException {
-        if (initialized) {
-            openDb();
-            long result =  putUserShift(userShift);
-            closeDb();
-            return result;
-        } else {
-            throw new SQLiteException("SQLiteAssistant still not initialized.");
-        }
-    }
-
-    /**
      * Insert an array of users into database
+     *
+     * @author Alejandro Olivan Alvarez
      * @param users an array of User objects to be persisited
      * @return an array of longs with all inserted row ids
      */
@@ -333,6 +294,8 @@ public class SQLiteAssistant {
 
     /**
      * Insert an array of Shifts into database
+     *
+     * @author Alejandro Olivan Alvarez
      * @param shifts an array of Shift objects to be persisited
      * @return an array of longs with all inserted row ids
      */
@@ -351,9 +314,10 @@ public class SQLiteAssistant {
         }
     }
 
-
     /**
      * Insert an array of UserShifts into database
+     *
+     * @author Alejandro Olivan Alvarez
      * @param userShifts an array of UserShift objects to be persisited
      * @return an array of longs with all inserted row ids
      */
@@ -374,7 +338,9 @@ public class SQLiteAssistant {
 
     /**
      * Insert a whole ORMCache objects container into DB
-     * @param cache
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param cache an ORMCache instance to be persisted in DB
      */
     public void persistOrmCache(ORMCache cache) throws SQLiteException {
         if (initialized) {
@@ -393,10 +359,12 @@ public class SQLiteAssistant {
         }
     }
 
-        /**
-         * This method returns a Cursor pointing to all recorded Users in DB
-         * @return
-         */
+    /**
+     * This method returns a Cursor pointing to all recorded Users in DB
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a collection with all possible User instances from DB
+     */
     public ArrayList<User> getAllUsers() throws SQLiteException {
         if (initialized) {
             ArrayList<User> result = new ArrayList<>();
@@ -435,7 +403,9 @@ public class SQLiteAssistant {
 
     /**
      * This method returns a Cursor pointing to all recorded Shifts in DB
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a collection with all possible Shift instances from DB
      */
     public ArrayList<Shift> getAllShifts() throws SQLiteException {
         if (initialized) {
@@ -473,7 +443,9 @@ public class SQLiteAssistant {
 
     /**
      * This method builds an array of strings with all shift names in DB
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a string array with all shift names in DB
      * @throws SQLiteException
      */
     public String[] getShiftNames() throws SQLiteException {
@@ -491,7 +463,9 @@ public class SQLiteAssistant {
 
     /**
      * This method builds an array of strings with all shift colors in DB
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return A string array with all colors of all shifts in DB
      * @throws SQLiteException
      */
     public String[] getShiftColors() throws SQLiteException {
@@ -510,9 +484,11 @@ public class SQLiteAssistant {
     /**
      * This method retrieves the color of an user work day by means of
      * asigned shift to him/her. The method needs the User object and the date.
+     *
+     * @author Alejandro Olivan Alvarez
      * @param u User to which query the calendar
      * @param d Date at which Shift color has to be queried.
-     * @return
+     * @return The color attribute value as string of the first matching criteria Shift
      * @throws SQLiteException
      * @throws ParseException
      */
@@ -527,6 +503,8 @@ public class SQLiteAssistant {
 
     /**
      * This method builds an array of strings with all usernames in DB
+     *
+     * @author Alejandro Olivan Alvarez
      * @return String full fith username strings
      * @throws SQLiteException
      */
@@ -546,8 +524,10 @@ public class SQLiteAssistant {
     /**
      * This method returns a cursor with the rows containing certain items by key field.
      * Theoretically, just a single row in resulting cursor should be present...
-     * @param userName
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param userName The userName to filter during the DB query
+     * @return the first matching User found at DB
      */
     public User getUserByUserName(String userName) throws SQLiteException {
         if (initialized) {
@@ -592,54 +572,10 @@ public class SQLiteAssistant {
     /**
      * This method returns a cursor with the rows containing certain items by key field.
      * Theoretically, just a single row in resulting cursor should be present...
-     * @param idUser User id as integer
-     * @return
-     */
-    public User getUserById(int idUser) throws SQLiteException {
-        if (initialized) {
-            ArrayList<User> candidates = new ArrayList<>();
-            User result;
-            Cursor dbRows;
-            openDb();
-            dbRows = db.query(true, DB_USER_TABLE, new String[] {
-                    KEY_USER_IDUSER,
-                    KEY_USER_USERDNI,
-                    KEY_USER_USERNAME,
-                    KEY_USER_REALNAME,
-                    KEY_USER_PASS,
-                    KEY_USER_ADMIN }, KEY_USER_IDUSER + " = " + idUser, null, null, null, null, null);
-
-            if (dbRows.moveToFirst()){
-                do {
-                    candidates.add(new User(
-                            dbRows.getInt(0),
-                            dbRows.getInt(5),
-                            dbRows.getString(1),
-                            dbRows.getString(2),
-                            dbRows.getString(3),
-                            dbRows.getString(4)
-                    ));
-                } while (dbRows.moveToNext());
-                closeDb();
-                if (!candidates.isEmpty()) {
-                    return candidates.get(0);
-                } else {
-                    return null;
-                }
-            } else {
-                closeDb();
-                return null;
-            }
-        } else {
-            throw new SQLiteException("SQLiteAssistant still not initialized.");
-        }
-    }
-
-    /**
-     * This method returns a cursor with the rows containing certain items by key field.
-     * Theoretically, just a single row in resulting cursor should be present...
-     * @param idShift
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param idShift the filtering ID value as int to filter Shifts
+     * @return The first matching Shift obtained on query
      */
     public Shift getShiftById(int idShift) throws SQLiteException {
         if (initialized) {
@@ -683,9 +619,11 @@ public class SQLiteAssistant {
     /**
      * This method returns an UserShift object from DB based on a query that has
      * User and date search filters. Those data are received as arguments
+     *
+     * @author Alejandro Olivan Alvarez
      * @param u the user we want to filter the search.
      * @param d the date at which we are looking for.
-     * @return
+     * @return The resulting UserShift nstance of the search
      * @throws SQLiteException
      * @throws ParseException
      */
@@ -728,8 +666,13 @@ public class SQLiteAssistant {
         }
     }
 
+    /**
+     * This method allows external check of initialized condition of this instance
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean indicating if the instance has been initialized (true) or not (false)
+     */
     public boolean isInitialized(){
         return initialized;
     }
-
 }

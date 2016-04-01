@@ -11,7 +11,9 @@ import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
 import java.util.HashMap;
 
 /**
- * Created by alex on 3/03/16.
+ * This class is the Tab adapter that generates the tabs on the main activity
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class TabPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -19,7 +21,7 @@ public class TabPagerAdapter extends FragmentStatePagerAdapter {
     int mNumOfTabs;
     HashMap<Integer,Fragment> fragments = new HashMap<>();
 
-    // COSTRUCTOR
+    // CONSTRUCTOR
     public TabPagerAdapter(FragmentManager fm, int NumOfTabs) {
         super(fm);
         this.mNumOfTabs = NumOfTabs;
@@ -29,8 +31,10 @@ public class TabPagerAdapter extends FragmentStatePagerAdapter {
 
     /**
      * This method is the override of getItem... it generates and returns the
-     * correspondant fragment based on position. It also stores a reference to the
+     * corresponding fragment based on position. It also stores a reference to the
      * fragment into a HashMap, in order to retrieve them as necessary.
+     *
+     * @author Alejandro Olivan Alvarez
      * @param position
      * @return
      */
@@ -57,7 +61,9 @@ public class TabPagerAdapter extends FragmentStatePagerAdapter {
 
     /**
      * Return the number of tabs handled by the adapter
-     * @return
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return an integer whit the total count of generated fragments
      */
     @Override
     public int getCount() {
@@ -67,6 +73,8 @@ public class TabPagerAdapter extends FragmentStatePagerAdapter {
     /**
      * This method is useful to retrieve areference to the instantiated fragment
      * at each position.
+     *
+     * @author Alejandro Olivan Alvarez
      * @param key the position (tab position)
      * @return the fragment instance referenced by the key.
      */

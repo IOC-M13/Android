@@ -1,11 +1,7 @@
 package com.afodevelop.chronoschedule.controllers.adapters;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,18 +11,23 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.afodevelop.chronoschedule.R;
-import com.afodevelop.chronoschedule.controllers.activities.ShiftFormActivity;
 import com.afodevelop.chronoschedule.controllers.fragments.ShiftsFragment;
-import com.afodevelop.chronoschedule.controllers.fragments.UsersFragment;
-import com.afodevelop.chronoschedule.model.Shift;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 /**
- * Created by alex on 10/03/16.
+ * This class is the adapter that builds the Shifts List on the Shifts Fragment
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
+
+    // INTERNAL-CLASS DEFINITIONS
+    private static class UserHolder {
+        ImageButton btnDelete;
+        ImageButton btnEdit;
+        TextView itemName;
+    }
 
     // CLASS-WIDE VARIABLES
     Context context;
@@ -46,6 +47,17 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
     }
 
     // LOGIC
+
+    /**
+     * The getView method mandatory override.
+     * Here the view is finally assembled before returning it back
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
     public View getView(int position, View convertView, final ViewGroup parent) {
         View row = convertView;
@@ -84,13 +96,6 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
                 parentFragment.deleteShift(shiftPosition);
             }
         });
-
         return row;
-    }
-
-    static class UserHolder {
-        ImageButton btnDelete;
-        ImageButton btnEdit;
-        TextView itemName;
     }
 }

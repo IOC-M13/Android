@@ -27,15 +27,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Created by alex on 3/03/16.
+ * This is the Fragment Class that holds the Calendar.
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class ShiftsFragment extends Fragment {
-
-    // COSTANTS
 
     // INTERNAL CLASS DEFINITIONS
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class DeleteShiftTask extends AsyncTask<Void, Void, Void> {
 
@@ -69,8 +71,7 @@ public class ShiftsFragment extends Fragment {
         }
     }
 
-    // CLASSWIDE VARIABLES
-    
+    // CLASS-WIDE VARIABLES
     private MainActivity mainActivity;
     private View myFragmentView;
     private ListView listView;
@@ -82,8 +83,18 @@ public class ShiftsFragment extends Fragment {
 
     // LOGIC
 
+    /**
+     * The Fragment's onCreateView mandatory override that holds Vies initialization
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         myFragmentView = inflater.inflate(R.layout.shifts_fragment, container, false);
 
         // Initialize a variable pointing to parent Activity
@@ -94,7 +105,8 @@ public class ShiftsFragment extends Fragment {
         shiftsPositionIDMap = new HashMap<>();
 
         listView = (ListView) myFragmentView.findViewById(R.id.shifts_list);
-        arrayAdapter = new ShiftsListArrayAdapter(getActivity(), R.layout.users_shifts_listview, shifts, ShiftsFragment.this);
+        arrayAdapter = new ShiftsListArrayAdapter(getActivity(), R.layout.users_shifts_listview,
+                shifts, ShiftsFragment.this);
         listView.setAdapter(arrayAdapter);
 
         refreshData();
@@ -117,6 +129,8 @@ public class ShiftsFragment extends Fragment {
     /**
      * We are using the onResume flow call to prompt for calendar refreshing:
      * Refreshthe data, the decoration, and apply all this again to the calendar
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     public void onResume() {
@@ -126,7 +140,9 @@ public class ShiftsFragment extends Fragment {
 
     /**
      * Get/Refresh data from DB to fill arrays of strings with most used data
-     * usernames, shiftnames and shift colors
+     * usernames, shiftnames and shift colors.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void refreshData() {
         try {
@@ -158,6 +174,8 @@ public class ShiftsFragment extends Fragment {
      * Call delete shift in our MySQLAssistant. we got the shiftId passed as
      * argument. So we first get the target shift, and then pass it to
      * MySQLAssistant delete method
+     *
+     * @author Alejandro Olivan Alvarez
      * @param position
      */
     public void deleteShift(final int position){
@@ -169,15 +187,14 @@ public class ShiftsFragment extends Fragment {
             myAlertDialog.setMessage("Please confirm deletion of item");
             myAlertDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
-                    DeleteShiftTask deleteShiftTask = new DeleteShiftTask(shiftsPositionIDMap.get(position));
+                    DeleteShiftTask deleteShiftTask = new DeleteShiftTask(
+                            shiftsPositionIDMap.get(position));
                     deleteShiftTask.execute();
                 }
             });
             myAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-                public void onClick(DialogInterface arg0, int arg1) {
-                    // do something when the Cancel button is clicked
-                }
+                public void onClick(DialogInterface arg0, int arg1) {}
             });
             myAlertDialog.show();
         } else {
@@ -189,6 +206,8 @@ public class ShiftsFragment extends Fragment {
     /**
      * This method prepares and launches the shiftForm activity to edit a shift
      * whose shift ID is passed as integer param
+     *
+     * @author Alejandro Olivan Alvarez
      * @param position an nteger with the ID of shift to be edited
      */
     public void editShift(int position){
@@ -204,7 +223,9 @@ public class ShiftsFragment extends Fragment {
 
     /**
      * An auxiliar method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s A string with the text we want to print in the toast
      */
     private void printToast(String s){
         Toast.makeText(mainActivity, s, Toast.LENGTH_SHORT).show();

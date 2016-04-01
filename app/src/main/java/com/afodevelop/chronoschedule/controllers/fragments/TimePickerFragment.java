@@ -15,12 +15,17 @@ import java.util.Calendar;
 
 
 /**
- * Created by alex on 7/03/16.
+ * This is the Fragment that generates our time-picker dialog.
+ *
+ * @author Alejandro Olivan Alvarez
  */
-public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener{
+public class TimePickerFragment extends DialogFragment implements
+        TimePickerDialog.OnTimeSetListener{
 
-
+    // CLASS_WIDE VARIABLES
     String targetView;
+
+    //LOGIC
 
     /**
      * Create a new instance of MyDialogFragment, providing "num"
@@ -28,7 +33,6 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
      */
     public static TimePickerFragment newInstance(String targetView) {
         TimePickerFragment f = new TimePickerFragment();
-
         // Supply num input as an argument.
         Bundle args = new Bundle();
         args.putString("targetView", targetView);
@@ -37,6 +41,14 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         return f;
     }
 
+    /**
+     * The mandatory onCreateDialog override where we define the dialog settings
+     * and contents.
+     *
+     * @Alejandro Olivan Alvarez
+     * @param savedInstanceState
+     * @return A Doalg class instance with the generated Dialog
+     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
         //Use the current time as the default values for the time picker
@@ -49,24 +61,27 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         TimePickerDialog tpd = new TimePickerDialog(getActivity(), AlertDialog.THEME_HOLO_LIGHT
                 ,this, hour, minute, DateFormat.is24HourFormat(getActivity()));
 
-        //You can set a simple text title for TimePickerDialog
-        //tpd.setTitle("Title Of Time Picker Dialog");
-
-        /*.........Set a custom title for picker........*/
         TextView tvTitle = new TextView(getActivity());
         tvTitle.setText("Select time");
         tvTitle.setBackgroundColor(Color.parseColor("#EEE8AA"));
         tvTitle.setPadding(5, 3, 5, 3);
         tvTitle.setGravity(Gravity.CENTER_HORIZONTAL);
         tpd.setCustomTitle(tvTitle);
-        /*.........End custom title section........*/
 
         return tpd;
     }
 
-    //onTimeSet() callback method
+    /**
+     * This method handles what to do once the user has selected certain time on the
+     * time picker dialog.
+     * Basically it ensures time format follows the correct string format.
+     *
+     * @Alejandro Olivan Alvarez
+     * @param view
+     * @param hourOfDay
+     * @param minute
+     */
     public void onTimeSet(TimePicker view, int hourOfDay, int minute){
-        //Do something with the user chosen time
 
         //Get reference of host activity (XML Layout File) TextView widget
         int id = getResources().getIdentifier(targetView, "id", getActivity().getPackageName());

@@ -25,15 +25,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 /**
- * Created by alex on 3/03/16.
+ * This is the Fragment Class that holds the Calendar.
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class UsersFragment extends Fragment {
-
-    // COSTANTS
 
     // INTERNAL CLASS DEFINITIONS
     /**
      * This class is an AsyncTask based task that performs a user data update.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     private class DeleteUserTask extends AsyncTask<Void, Void, Void> {
 
@@ -78,6 +80,15 @@ public class UsersFragment extends Fragment {
 
     // LOGIC
 
+    /**
+     * The Fragment's onCreateView mandatory override that holds Vies initialization
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         myFragmentView = inflater.inflate(R.layout.users_fragment, container, false);
@@ -112,6 +123,8 @@ public class UsersFragment extends Fragment {
     /**
      * We are using the onResume flow call to prompt for calendar refreshing:
      * Refreshthe data, the decoration, and apply all this again to the calendar
+     *
+     * @author Alejandro Olivan Alvarez
      */
     @Override
     public void onResume() {
@@ -121,7 +134,9 @@ public class UsersFragment extends Fragment {
 
     /**
      * Get/Refresh data from DB to fill arrays of strings with most used data
-     * usernames, shiftnames and shift colors
+     * usernames, shiftnames and shift colors.
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void refreshData() {
         try {
@@ -147,7 +162,9 @@ public class UsersFragment extends Fragment {
      * Call delete user in our MySQLAssistant. we got the username passed as
      * argument. So we first get the target user, and then pass it to
      * MySQLAssistant delete method
-     * @param userName
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param userName The filtering userName attribute
      */
     public void deleteUser(final String userName){
         if (connectivity) {
@@ -163,21 +180,20 @@ public class UsersFragment extends Fragment {
             });
             myAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-                public void onClick(DialogInterface arg0, int arg1) {
-                    // do something when the Cancel button is clicked
-                }
+                public void onClick(DialogInterface arg0, int arg1) {}
             });
             myAlertDialog.show();
         } else {
             printToast("Impossible to comply: can't delete user while in OFF-LINE mode.");
         }
-
     }
 
     /**
      * This method prepares and launches the userForm activity to edit a user
      * whose userName is passed as string param
      * @param user a String with the username of user to be edited
+     *
+     * @author Alejandro Olivan Alvarez
      */
     public void editUser(String user){
         Intent i = new Intent(getActivity(), UserFormActivity.class);
@@ -190,7 +206,9 @@ public class UsersFragment extends Fragment {
 
     /**
      * An auxiliar method to ease Toast printing
-     * @param s
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param s A string with the text we want to print in the toast
      */
     private void printToast(String s){
         Toast.makeText(mainActivity, s, Toast.LENGTH_SHORT).show();

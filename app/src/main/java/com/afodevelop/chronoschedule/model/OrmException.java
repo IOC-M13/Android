@@ -1,7 +1,9 @@
 package com.afodevelop.chronoschedule.model;
 
 /**
- * Created by alex on 3/19/16.
+ * A custom Exception to handle ORM operation-related exceptions
+ *
+ * @author Alejandro Olivan Alvarez
  */
 public class OrmException extends Exception{
 
