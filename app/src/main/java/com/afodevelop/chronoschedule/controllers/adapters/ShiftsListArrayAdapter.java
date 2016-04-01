@@ -79,23 +79,27 @@ public class ShiftsListArrayAdapter extends ArrayAdapter<String> {
         shiftName = data.get(position);
 
         holder.itemName.setText(shiftName);
-        holder.btnEdit.setOnClickListener(new View.OnClickListener() {
-            final int shiftPosition = pos;
-            @Override
-            public void onClick(View v) {
-                Log.d("ShitfsArrayAdapter", "click btnEdit at row " + shiftPosition);
-                parentFragment.editShift(shiftPosition);
-            }
-        });
+        if (parentFragment.hasConnectivity()) {
+            holder.btnEdit.setOnClickListener(new View.OnClickListener() {
+                final int shiftPosition = pos;
 
-        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-            final int shiftPosition = pos;
-            @Override
-            public void onClick(View v) {
-                Log.d("ShitfsArrayAdapter", "click btnDelete at row " + shiftPosition);
-                parentFragment.deleteShift(shiftPosition);
-            }
-        });
+                @Override
+                public void onClick(View v) {
+                    Log.d("ShitfsArrayAdapter", "click btnEdit at row " + shiftPosition);
+                    parentFragment.editShift(shiftPosition);
+                }
+            });
+
+            holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+                final int shiftPosition = pos;
+
+                @Override
+                public void onClick(View v) {
+                    Log.d("ShitfsArrayAdapter", "click btnDelete at row " + shiftPosition);
+                    parentFragment.deleteShift(shiftPosition);
+                }
+            });
+        }
         return row;
     }
 }

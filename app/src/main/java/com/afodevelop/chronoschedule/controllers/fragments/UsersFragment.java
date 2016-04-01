@@ -90,7 +90,8 @@ public class UsersFragment extends Fragment {
      * @return
      */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         myFragmentView = inflater.inflate(R.layout.users_fragment, container, false);
 
         // Initialize a variable pointing to parent Activity
@@ -100,9 +101,11 @@ public class UsersFragment extends Fragment {
         userNames = new ArrayList<>();
 
         listView = (ListView) myFragmentView.findViewById(R.id.users_list);
-        arrayAdapter = new UsersListArrayAdapter(getActivity(), R.layout.users_shifts_listview, userNames, UsersFragment.this);
+        arrayAdapter = new UsersListArrayAdapter(getActivity(), R.layout.users_shifts_listview,
+                userNames, UsersFragment.this);
         listView.setAdapter(arrayAdapter);
 
+        // Early data refresh
         refreshData();
 
         addUserButton = (FloatingActionButton) myFragmentView.findViewById(R.id.add_user_button);
@@ -116,13 +119,35 @@ public class UsersFragment extends Fragment {
                 startActivity(i);
             }
         });
+        updateButton(connectivity);
 
         return myFragmentView;
     }
 
     /**
+     * This method enables to dynamically enable/show disable/hide the + button
+     * So, basing on connectivity status, the button is controlled.
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param enable a boolean stating whether the fab button has to be rendered
+     */
+    private void updateButton(boolean enable){
+        if (addUserButton != null) {
+            if (enable) {
+                addUserButton.setVisibility(View.VISIBLE);
+                addUserButton.setClickable(true);
+                addUserButton.setEnabled(true);
+            } else {
+                addUserButton.setVisibility(View.GONE);
+                addUserButton.setClickable(false);
+                addUserButton.setEnabled(false);
+            }
+        }
+    }
+
+    /**
      * We are using the onResume flow call to prompt for calendar refreshing:
-     * Refreshthe data, the decoration, and apply all this again to the calendar
+     * Refresh the data, the decoration, and apply all this again to the calendar
      *
      * @author Alejandro Olivan Alvarez
      */
@@ -149,8 +174,11 @@ public class UsersFragment extends Fragment {
                 userNames.add(userName);
             }
 
-            listView.invalidateViews();
-            arrayAdapter.notifyDataSetChanged();
+            arrayAdapter = new UsersListArrayAdapter(getActivity(), R.layout.users_shifts_listview,
+                    userNames, UsersFragment.this);
+            listView.setAdapter(arrayAdapter);
+
+            updateButton(connectivity);
 
         } catch (SQLiteException e) {
             printToast("Error fetching data from DB.");
@@ -179,7 +207,6 @@ public class UsersFragment extends Fragment {
                 }
             });
             myAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
                 public void onClick(DialogInterface arg0, int arg1) {}
             });
             myAlertDialog.show();
@@ -212,5 +239,16 @@ public class UsersFragment extends Fragment {
      */
     private void printToast(String s){
         Toast.makeText(mainActivity, s, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * This method is used by the adapter (or anyone else!) to query its containing fragment
+     * about connectivity status
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean indicating connectivity is possible (true) or not (false)
+     */
+    public boolean hasConnectivity(){
+        return connectivity;
     }
 }

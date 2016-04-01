@@ -76,8 +76,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.d("mainactivity","connectivity status update: " + connectivity);
+            Log.d("mainactivity", "connectivity status update: " + connectivity);
             invalidateOptionsMenu();
+            refreshFragments();
         }
     }
 
@@ -204,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 currentTab = tab.getPosition();
                 viewPager.setCurrentItem(currentTab);
+                refreshFragments();
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {}
@@ -325,7 +327,6 @@ public class MainActivity extends AppCompatActivity {
                 UsersFragment usersFragment = (UsersFragment) tabPagerAdapter.
                         getfragments(1);
                 usersFragment.refreshData();
-                calendarFragment.refreshData();
                 break;
             case 2:
                 Log.d("refreshFragments", "refresh shifts fragment");

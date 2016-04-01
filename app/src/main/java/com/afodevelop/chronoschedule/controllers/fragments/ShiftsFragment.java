@@ -109,6 +109,7 @@ public class ShiftsFragment extends Fragment {
                 shifts, ShiftsFragment.this);
         listView.setAdapter(arrayAdapter);
 
+        // Early refresh data
         refreshData();
 
         addShiftButton = (FloatingActionButton) myFragmentView.findViewById(R.id.add_shift_button);
@@ -122,8 +123,30 @@ public class ShiftsFragment extends Fragment {
                 startActivity(i);
             }
         });
+        updateButton(connectivity);
 
         return myFragmentView;
+    }
+
+    /**
+     * This method enables to dynamically enable/show disable/hide the + button
+     * So, basing on connectivity status, the button is controlled.
+     *
+     * @author Alejandro Olivan Alvarez
+     * @param enable a boolean stating whether the fab button has to be rendered
+     */
+    private void updateButton(boolean enable){
+        if (addShiftButton != null) {
+            if (enable) {
+                addShiftButton.setVisibility(View.VISIBLE);
+                addShiftButton.setClickable(true);
+                addShiftButton.setEnabled(true);
+            } else {
+                addShiftButton.setVisibility(View.GONE);
+                addShiftButton.setClickable(false);
+                addShiftButton.setEnabled(false);
+            }
+        }
     }
 
     /**
@@ -161,8 +184,11 @@ public class ShiftsFragment extends Fragment {
                 i++;
             }
 
-            listView.invalidateViews();
-            arrayAdapter.notifyDataSetChanged();
+            arrayAdapter = new ShiftsListArrayAdapter(getActivity(), R.layout.users_shifts_listview,
+                    shifts, ShiftsFragment.this);
+            listView.setAdapter(arrayAdapter);
+
+            updateButton(connectivity);
 
         } catch (SQLiteException e) {
             printToast("Error fetching data from DB.");
@@ -229,5 +255,16 @@ public class ShiftsFragment extends Fragment {
      */
     private void printToast(String s){
         Toast.makeText(mainActivity, s, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * This method is used by the adapter (or anyone else!) to query its containing fragment
+     * about connectivity status
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean indicating connectivity is possible (true) or not (false)
+     */
+    public boolean hasConnectivity(){
+        return connectivity;
     }
 }

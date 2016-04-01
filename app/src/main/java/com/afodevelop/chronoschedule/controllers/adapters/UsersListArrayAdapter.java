@@ -79,25 +79,28 @@ public class UsersListArrayAdapter extends ArrayAdapter<String> {
         user = data.get(position);
 
         holder.itemName.setText(user);
-        holder.btnEdit.setOnClickListener(new View.OnClickListener() {
-            final int userPosition = pos;
-            final String userName = data.get(pos);
-            @Override
-            public void onClick(View v) {
-                Log.d("UsersArrayAdapter", "click btnEdit at row " + userPosition);
-                parentFragment.editUser(userName);
-            }
-        });
-        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-            final int userPosition = pos;
-            final String userName = data.get(pos);
-            @Override
-            public void onClick(View v) {
-                Log.d("UsersArrayAdapter", "click btnDelete at row " + userPosition);
-                parentFragment.deleteUser(userName);
-            }
-        });
+        if (parentFragment.hasConnectivity()) {
+            holder.btnEdit.setOnClickListener(new View.OnClickListener() {
+                final int userPosition = pos;
+                final String userName = data.get(pos);
 
+                @Override
+                public void onClick(View v) {
+                    Log.d("UsersArrayAdapter", "click btnEdit at row " + userPosition);
+                    parentFragment.editUser(userName);
+                }
+            });
+            holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+                final int userPosition = pos;
+                final String userName = data.get(pos);
+
+                @Override
+                public void onClick(View v) {
+                    Log.d("UsersArrayAdapter", "click btnDelete at row " + userPosition);
+                    parentFragment.deleteUser(userName);
+                }
+            });
+        }
         return row;
     }
 }
