@@ -297,7 +297,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
      *
      * @author Alejandro Olivan Alvarez
      * @param dialogId This param identifies the dialog instance
-     * @param color The color actually selectedd by user
+     * @param color The color actually selected by user
      */
     @Override
     public void onColorSelected(int dialogId, int color) {
@@ -350,6 +350,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
             shift.setName(shiftNameTextEdit.getText().toString());
             shift.setStartTime(startTimeTextView.getText().toString());
             shift.setEndTime(endTimeTextView.getText().toString());
+            pickedColor = pickedColor.startsWith("#") ? pickedColor.substring(1) : pickedColor;
             shift.setColor(pickedColor);
             UpdateShiftTask updateShiftTask = new UpdateShiftTask();
             updateShiftTask.execute();
@@ -370,7 +371,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
      * available connectivity.
      *
      * @author Alejandro Olivan Alvarez
-     * @return a booleant true (if we got connectivity) or false (if not)
+     * @return a boolean true (if we got connectivity) or false (if not)
      */
     private boolean checkConnectivity(){
         try {
@@ -383,7 +384,7 @@ public class ShiftFormActivity extends AppCompatActivity implements ColorPickerD
     }
 
     /**
-     * This method is responsable of instantiate, initialize and start both an
+     * This method is responsible of instantiate, initialize and start both an
      * AlrManager driven periodic broadcasting event, and an broadcast listener that,
      * on receiving the advise, trigges connectivity status check.
      *

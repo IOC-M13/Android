@@ -370,7 +370,7 @@ public class LoginActivity extends AppCompatActivity {
         alarmPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         long now = System.currentTimeMillis();
-        long interval = 1 * 15 * 1000; // 1 hour
+        long interval = 1 * 15 * 1000;
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, now + interval, interval,
                 alarmPendingIntent);
 

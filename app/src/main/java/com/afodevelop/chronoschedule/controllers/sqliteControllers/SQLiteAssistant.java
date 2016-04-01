@@ -220,7 +220,10 @@ public class SQLiteAssistant {
             newValues.put(KEY_USER_PASS, user.getPass());
             newValues.put(KEY_USER_ADMIN, user.getAdmin());
             // return row ID
-            return db.insert(DB_USER_TABLE, null, newValues);
+            openDb();
+            long result = db.insert(DB_USER_TABLE, null, newValues);
+            closeDb();
+            return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
@@ -243,7 +246,10 @@ public class SQLiteAssistant {
             newValues.put(KEY_SHIFT_ENDTIME, shift.getEndTime());
             newValues.put(KEY_SHIFT_COLOR, shift.getColor());
             // return row ID
-            return db.insert(DB_SHIFT_TABLE, null, newValues);
+            openDb();
+            long result = db.insert(DB_SHIFT_TABLE, null, newValues);
+            closeDb();
+            return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
@@ -264,7 +270,10 @@ public class SQLiteAssistant {
             newValues.put(KEY_USERSHIFT_IDSHIFT, userShift.getShift().getIdShift());
             newValues.put(KEY_USERSHIFT_DATE, userShift.getDate().toString());
             // return row ID
-            return db.insert(DB_USERSHIFT_TABLE, null, newValues);
+            openDb();
+            long result = db.insert(DB_USERSHIFT_TABLE, null, newValues);
+            closeDb();
+            return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
@@ -282,10 +291,10 @@ public class SQLiteAssistant {
             ArrayList<Long> result = new ArrayList<>();
             openDb();
             db.execSQL(DB_CLEAR_USERS);
+            closeDb();
             for (User u: users) {
                 result.add(putUser(u));
             }
-            closeDb();
             return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
@@ -304,10 +313,10 @@ public class SQLiteAssistant {
             ArrayList<Long> result = new ArrayList<>();
             openDb();
             db.execSQL(DB_CLEAR_SHIFTS);
+            closeDb();
             for (Shift s: shifts) {
                 result.add(putShift(s));
             }
-            closeDb();
             return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
@@ -326,10 +335,10 @@ public class SQLiteAssistant {
             ArrayList<Long> result = new ArrayList<>();
             openDb();
             db.execSQL(DB_CLEAR_USERSSHIFTS);
+            closeDb();
             for (UserShift us : userShifts) {
                 result.add(putUserShift(us));
             }
-            closeDb();
             return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
