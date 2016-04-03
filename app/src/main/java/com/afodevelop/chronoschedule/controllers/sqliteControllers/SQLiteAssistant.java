@@ -181,9 +181,11 @@ public class SQLiteAssistant {
      *
      * @author Alejandro Olivan Alvarez
      */
-    public void openDb() throws SQLiteException {
+    public synchronized void openDb() throws SQLiteException {
         if (initialized) {
-            db = sQLiteHelper.getWritableDatabase();
+            if (db == null) {
+                db = sQLiteHelper.getWritableDatabase();
+            }
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
@@ -194,9 +196,11 @@ public class SQLiteAssistant {
      *
      * @author Alejandro Olivan Alvarez
      */
-    public void closeDb() throws SQLiteException {
+    public synchronized void closeDb() throws SQLiteException {
         if (initialized) {
-            sQLiteHelper.close();
+            if (db != null && db.isOpen()) {
+                sQLiteHelper.close();
+            }
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
         }
@@ -222,7 +226,6 @@ public class SQLiteAssistant {
             // return row ID
             openDb();
             long result = db.insert(DB_USER_TABLE, null, newValues);
-            closeDb();
             return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
@@ -248,7 +251,6 @@ public class SQLiteAssistant {
             // return row ID
             openDb();
             long result = db.insert(DB_SHIFT_TABLE, null, newValues);
-            closeDb();
             return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
@@ -272,7 +274,6 @@ public class SQLiteAssistant {
             // return row ID
             openDb();
             long result = db.insert(DB_USERSHIFT_TABLE, null, newValues);
-            closeDb();
             return result;
         } else {
             throw new SQLiteException("SQLiteAssistant still not initialized.");
@@ -291,7 +292,6 @@ public class SQLiteAssistant {
             ArrayList<Long> result = new ArrayList<>();
             openDb();
             db.execSQL(DB_CLEAR_USERS);
-            closeDb();
             for (User u: users) {
                 result.add(putUser(u));
             }
@@ -313,7 +313,6 @@ public class SQLiteAssistant {
             ArrayList<Long> result = new ArrayList<>();
             openDb();
             db.execSQL(DB_CLEAR_SHIFTS);
-            closeDb();
             for (Shift s: shifts) {
                 result.add(putShift(s));
             }
@@ -335,7 +334,6 @@ public class SQLiteAssistant {
             ArrayList<Long> result = new ArrayList<>();
             openDb();
             db.execSQL(DB_CLEAR_USERSSHIFTS);
-            closeDb();
             for (UserShift us : userShifts) {
                 result.add(putUserShift(us));
             }
@@ -399,10 +397,11 @@ public class SQLiteAssistant {
                             dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
-                closeDb();
+                dbRows.close();
                 return result;
             }else {
-                closeDb();
+                dbRows.close();
+
                 return null;
             }
         } else {
@@ -439,10 +438,10 @@ public class SQLiteAssistant {
                             dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
-                closeDb();
+                dbRows.close();
                 return result;
             }else {
-                closeDb();
+                dbRows.close();
                 return null;
             }
         } else {
@@ -541,7 +540,6 @@ public class SQLiteAssistant {
     public User getUserByUserName(String userName) throws SQLiteException {
         if (initialized) {
             ArrayList<User> candidates = new ArrayList<>();
-            User result;
             Cursor dbRows;
             openDb();
             dbRows = db.query(true, DB_USER_TABLE, new String[] {
@@ -563,14 +561,14 @@ public class SQLiteAssistant {
                             dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
-                closeDb();
+                dbRows.close();
                 if (!candidates.isEmpty()) {
                     return candidates.get(0);
                 } else {
                     return null;
                 }
             } else {
-                closeDb();
+                dbRows.close();
                 return null;
             }
         } else {
@@ -589,7 +587,6 @@ public class SQLiteAssistant {
     public Shift getShiftById(int idShift) throws SQLiteException {
         if (initialized) {
             ArrayList<Shift> candidates = new ArrayList<>();
-            Shift result;
             Cursor dbRows;
             openDb();
             dbRows = db.query(true, DB_SHIFT_TABLE, new String[] {
@@ -610,14 +607,14 @@ public class SQLiteAssistant {
                             dbRows.getString(4)
                     ));
                 } while (dbRows.moveToNext());
-                closeDb();
+                dbRows.close();
                 if (!candidates.isEmpty()) {
                     return candidates.get(0);
                 } else {
                     return null;
                 }
             } else {
-                closeDb();
+                dbRows.close();
                 return null;
             }
         } else {
@@ -660,14 +657,14 @@ public class SQLiteAssistant {
                             new java.sql.Date(df.parse(dbRows.getString(2)).getTime())
                     ));
                 } while (dbRows.moveToNext());
-                closeDb();
+                dbRows.close();
                 if (!candidates.isEmpty()) {
                     return candidates.get(0);
                 } else {
                     return null;
                 }
             } else {
-                closeDb();
+                dbRows.close();
                 return null;
             }
         } else {
