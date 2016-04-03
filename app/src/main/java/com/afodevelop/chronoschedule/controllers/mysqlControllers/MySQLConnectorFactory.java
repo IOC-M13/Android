@@ -84,4 +84,14 @@ public class MySQLConnectorFactory {
             return null;
         }
     }
+
+    /**
+     * Allows for initialization check
+     *
+     * @author Alejandro Olivan Alvarez
+     * @return a boolean with initialization status boolean variable
+     */
+    public boolean isInitialized(){
+        return initialized;
+    }
 }
